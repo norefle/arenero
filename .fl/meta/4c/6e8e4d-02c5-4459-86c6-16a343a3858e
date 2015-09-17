@@ -1,0 +1,5 @@
+return {
+    id = "4c6e8e4d-02c5-4459-86c6-16a343a3858e",
+    name = "Add module for tiled map rendering.",
+    created = 1442505745
+}
