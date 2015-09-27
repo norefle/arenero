@@ -124,6 +124,14 @@ function love.keypressed(key, isrepeat)
         if Current and Current.down then
             Current.down()
         end
+    elseif "left" == key then
+        if Current and Current.left then
+            Current.left()
+        end
+    elseif "right" == key then
+        if Current and Current.right then
+            Current.right()
+        end
     end
 end
 
