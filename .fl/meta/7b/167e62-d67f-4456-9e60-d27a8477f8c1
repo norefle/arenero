@@ -1,0 +1,5 @@
+return {
+    id = "7b167e62-d67f-4456-9e60-d27a8477f8c1",
+    name = "Event based engine core.",
+    created = 1443387193
+}
