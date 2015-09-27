@@ -1,14 +1,14 @@
 local Grid = require "module.grid"
 
-local Modules = { require "module.picker", require "module.template" }
-local Current = nill
+local Modules = { }
+local count = 0
+local Current = nil
 
 local Thumbnail
 local start = { x = 100, y = 100 }
 local margin = 5
 local text = 15
 local size = { width = 128, height = 128 + margin + text }
-local count = #Modules
 
 local Console = {}
 
@@ -66,12 +66,23 @@ function love.load()
     Thumbnail = love.graphics.newImage("asset/thumbnail.png")
     Grid.init(love.graphics, wrap("grid", Console))
 
+    local moduleNames = love.filesystem.getDirectoryItems("module")
+    for _, name in pairs(moduleNames) do
+        if love.filesystem.isDirectory("module/" .. name)
+            and "grid" ~= name
+        then
+            Modules[#Modules + 1] = require("module." .. name)
+        end
+    end
+
     for _, module in pairs(Modules) do
         module.init(love.graphics, wrap(module.name, Console))
         if module.thumbnail then
             module.preview = love.graphics.newImage("module/template/" .. module.thumbnail)
         end
     end
+
+    count = #Modules
 end
 
 function love.resize(width, height)
@@ -80,7 +91,7 @@ function love.resize(width, height)
 end
 
 function love.mousepressed(x, y, button)
-    if nil ~= Current then
+    if Current then
         return
     end
 
@@ -98,9 +109,13 @@ function love.mousepressed(x, y, button)
 end
 
 function love.keypressed(key, isrepeat)
-    if "escape" == key and Current then
-        Current.unload()
-        Current = nil
+    if "escape" == key then
+        if Current then
+            Current.unload()
+            Current = nil
+        else
+            love.event.quit()
+        end
     elseif "up" == key then
         if Current and Current.up then
             Current.up()
@@ -115,9 +130,8 @@ end
 function love.draw()
     love.graphics.setBackgroundColor(136, 177, 247)
 
-    Grid.draw(boundingbox)
-
     if not Current then
+        Grid.draw(boundingbox)
         for index, module in pairs(Modules) do
             local x = start.x + (index - 1) * (size.width + margin)
             love.graphics.setColor(0, 0, 0, 128)
