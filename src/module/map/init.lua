@@ -154,9 +154,10 @@ function Module.draw(boundingbox)
         local left = evenRow and boundingbox.left + (C.TILE_WIDTH / 2) or boundingbox.left
         for col = cols, 1, -1 do
             local offset = cols - col
-            local index = (base.row - offset - 1) * map.dataWidth + (base.col - offset)
+            local tail = base.col - offset
+            local index = (base.row - offset - 1) * map.dataWidth + tail
             local tile = map.data[index]
-            if tile then
+            if tile and 0 < tail then
                 drawTile(
                     tostring(index),
                     tile,
