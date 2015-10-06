@@ -79,28 +79,34 @@ function Map.new(x, y, width, height)
     return setmetatable(object, { __index = Map })
 end
 
-function Map:moveUp()
-    if 1 < self.north.row then
-        self.north.row = self.north.row - 1
+local function clap(value, min, max)
+    if value < min then
+        value = min
+    elseif max < value then
+        value = max
     end
+    return value
+end
+
+local function move(map, dx, dy)
+    map.north.col = clap(map.north.col + dx, 1, map.dataWidth)
+    map.north.row = clap(map.north.row + dy, 1, map.dataHeight)
+end
+
+function Map:moveUp()
+    move(self, 1, -1)
 end
 
 function Map:moveDown()
-    if self.north.row < self.dataHeight then
-        self.north.row = self.north.row + 1
-    end
+    move(self, -1, 1)
 end
 
 function Map:moveLeft()
-    if 1 < self.north.col then
-        self.north.col = self.north.col - 1
-    end
+    move(self, -1, -1)
 end
 
 function Map:moveRight()
-    if self.north.col < self.dataWidth then
-        self.north.col = self.north.col + 1
-    end
+    move(self, 1, 1)
 end
 
 local Module = {}
