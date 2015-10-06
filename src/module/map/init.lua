@@ -34,8 +34,8 @@ function Map.new(x, y, width, height)
     object.width = width
     object.height = height
     -- Multiply with 2 because we will draw tiles with the half tile step
-    object.rows = math.modf(height / C.TILE_HEIGHT) * 2
-    object.cols = math.modf(width / C.TILE_WIDTH)
+    object.rows = math.modf(height / C.TILE_HEIGHT) * 2 + 1
+    object.cols = math.modf(width / C.TILE_WIDTH) + 1
 
     -- State
     -- visible tiles range.
@@ -154,10 +154,10 @@ end
 function Module.draw(boundingbox)
     local counter = 1
     local base = { row = map.north.row, col = map.north.col }
-    for row = 1, map.rows do
+    for row = 0, map.rows do
         local evenRow = (0 == row % 2)
-        local cols = evenRow and map.cols - 1 or map.cols
-        local left = evenRow and boundingbox.left + (C.TILE_WIDTH / 2) or boundingbox.left
+        local cols = map.cols
+        local left = evenRow and boundingbox.left - (C.TILE_WIDTH / 2) or boundingbox.left
         for col = cols, 1, -1 do
             local offset = cols - col
             local tail = base.col - offset
