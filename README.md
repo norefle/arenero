@@ -7,7 +7,7 @@ based on [LÖVE](https://love2d.org).
 
 ## Screen
 
-![Screen of the day](https://github.com/norefle/arenero/tree/master/screen_of_the_day.png)
+![Screen of the day](screen_of_the_day.png)
 
 ## Tasks
 
