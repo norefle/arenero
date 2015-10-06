@@ -5,6 +5,12 @@ based on [LÖVE](https://love2d.org).
 
 # Status
 
+## Screen
+
+![Screen of the day](https://github.com/norefle/arenero/tree/master/screen_of_the_day.png)
+
+## Tasks
+
 [   3 |   0 ] backlog
 
 27.09.2015 Event based engine core. ([7b167e62](https://github.com/norefle/arenero/tree/master/.fl/cards/7b/167e62-d67f-4456-9e60-d27a8477f8c1.md))
