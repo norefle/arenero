@@ -26,3 +26,9 @@ based on [LÖVE](https://love2d.org).
 17.09.2015 Add module for tiled map rendering. ([4c6e8e4d](.fl/cards/4c/6e8e4d-02c5-4459-86c6-16a343a3858e.md))
 
 [   0 |   0 ] done
+
+# Credits
+
+* Template icon by [Dimitry Sunseifer](https://thenounproject.com/term/icon-template/29200/)
+* Gears by [Max Hancock](https://thenounproject.com/term/process/9428/)
+
