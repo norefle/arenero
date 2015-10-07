@@ -1,0 +1,5 @@
+return {
+    id = "377cb1c4-151b-435d-8aba-d1b7cb83b109",
+    name = "Map: unpin map from the most right edge of the screen.",
+    created = 1444201591
+}

@@ -1,0 +1,5 @@
+return {
+    id = "351e6674-738d-4c99-87d8-e3b8c9bad4f8",
+    name = "Map: move the map by offsets not by tiles.",
+    created = 1444201496
+}

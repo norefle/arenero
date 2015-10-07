@@ -9,11 +9,6 @@ name = "Template.Markdown",
 version = "0.0.1",
 value = [[
 # ${NAME}
-
-## Description
-
-## Acceptance criteria
-
 ]]
 
 }

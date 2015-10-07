@@ -1,0 +1,5 @@
+return {
+    id = "2011fa93-5f69-4079-a878-f6efb902d450",
+    name = "Map: draw tile at the very bottom edge.",
+    created = 1444201422
+}
