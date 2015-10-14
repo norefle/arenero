@@ -11,15 +11,13 @@ local C = {}
 C.TILE_WIDTH = 64
 C.TILE_HEIGHT = 32
 
-local Tile = {}
-Tile.types = {
-    { name = "water", color = { 0, 128, 255, 128 } },
-    { name = "grass", color = { 0, 255, 128, 128 } }
-}
+C.grid = false
 
-Tile.types[0] = {
-    name = "empty", color = { 0, 0, 0, 255 }
-}
+local Tileset = {}
+Tileset.set = nil
+Tileset.tiles = {}
+Tileset.width = 0
+Tileset.height = 0
 
 local Map = {}
 local map = nil
@@ -92,6 +90,18 @@ end
 
 function Module.load()
     local err, level = pcall(require, "module.map.asset.level.level_1")
+    Tileset.set = lg.newImage("module/map/asset/" .. level.tileset.image)
+    Tileset.width = level.tileset.tilewidth
+    Tileset.height = level.tileset.tileheight
+    for i = 1, level.tileset.tilecount do
+        local tile = { }
+        tile.index = i
+        tile.data = lg.newQuad(
+            (i - 1) * Tileset.width, 0, Tileset.width, Tileset.height, Tileset.set:getDimensions()
+        )
+        Tileset.tiles[#Tileset.tiles + 1] = tile
+    end
+
     -- checks
     map = Map.new(0, 0, level, lg.getWidth(), lg.getHeight())
 end
@@ -102,29 +112,23 @@ local function drawTile(name, tileType, box)
         y = box.y + C.TILE_HEIGHT / 2
     }
 
-    if Tile.types[tileType] then
-        lg.setColor(unpack(Tile.types[tileType].color))
-    else
-        lg.setColor(255, 0, 0, 128)
+    local tile = Tileset.tiles[tileType]
+    if tile then
+        lg.setColor(255, 255, 255, 255)
+        lg.draw(Tileset.set, tile.data, box.x, box.y)
     end
-
-    lg.polygon(
-        "fill",
-        box.x, center.y,
-        center.x, box.y,
-        box.x + C.TILE_WIDTH, center.y,
-        center.x, box.y + C.TILE_HEIGHT
-    )
-    lg.setColor(204, 211, 222, 255)
     -- draw grid
-    lg.line(
-        box.x, center.y,
-        center.x, box.y,
-        box.x + C.TILE_WIDTH, center.y,
-        center.x, box.y + C.TILE_HEIGHT,
-        box.x, center.y
-    )
-    lg.printf(name, center.x - 7, center.y - 7, 20, "center")
+    lg.setColor(0, 0, 0, 255)
+    if C.grid then
+        lg.line(
+            box.x, center.y,
+            center.x, box.y,
+            box.x + C.TILE_WIDTH, center.y,
+            center.x, box.y + C.TILE_HEIGHT,
+            box.x, center.y
+        )
+        lg.printf(name, center.x - 7, center.y - 7, 20, "center")
+    end
 end
 
 function Module.draw(boundingbox)
