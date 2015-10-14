@@ -134,7 +134,7 @@ end
 function Module.draw(boundingbox)
     local counter = 1
     local base = { row = map.north.row, col = map.north.col }
-    for row = 0, map.rows do
+    for row = 0, map.rows + 1 do
         local evenRow = (0 == row % 2)
         local cols = map.cols
         local left = evenRow and boundingbox.left - (C.TILE_WIDTH / 2) or boundingbox.left
