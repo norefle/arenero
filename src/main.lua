@@ -1,14 +1,10 @@
-local Grid = require "module.grid"
+local Engine = require("core").create()
+local Queue = require "core.queue"
 
-local Modules = { }
-local count = 0
-local Current = nil
-
-local Thumbnail
-local start = { x = 100, y = 100 }
-local margin = 5
-local text = 15
-local size = { width = 128, height = 128 + margin + text }
+local boundingbox = {
+        left = 0, right = love.graphics.getWidth(),
+        top = 0, bottom = love.graphics.getHeight()
+}
 
 local Console = {}
 
@@ -56,33 +52,45 @@ local function wrap(module, console)
     return setmetatable(wrapper, { __index = console } )
 end
 
-local boundingbox = {
-        left = 0, right = love.graphics.getWidth(),
-        top = 0, bottom = love.graphics.getHeight()
-}
-
 function love.load()
     love.keyboard.setKeyRepeat(true)
-    Thumbnail = love.graphics.newImage("asset/thumbnail.png")
-    Grid.init(love.graphics, wrap("grid", Console))
+
+    local grid = Engine:scene("grid")
+
+    Engine:subscribe("keypress", "main", function(key)
+        if key == "escape" then
+            love.event.quit()
+            return true
+        end
+    end)
+
+    grid.data = require "scenes.grid"
+    grid.data.init(grid, love.graphics, wrap("grid", Console))
+    grid.modules = Queue.create()
+
+    grid:subscribe("draw", "grid", function()
+        grid.data.draw(grid.modules)
+        return true
+    end)
+    grid:subscribe("click", "grid", grid.data.click)
 
     local moduleNames = love.filesystem.getDirectoryItems("module")
     for _, name in pairs(moduleNames) do
-        if love.filesystem.isDirectory("module/" .. name)
-            and "grid" ~= name
-        then
-            Modules[#Modules + 1] = require("module." .. name)
+        if love.filesystem.isDirectory("module/" .. name) then
+            grid.modules:push(require("module." .. name))
         end
     end
 
-    for _, module in pairs(Modules) do
+    grid.modules:foreach(function(module)
         module.init(love.graphics, wrap(module.name, Console))
         if module.thumbnail then
             module.preview = love.graphics.newImage("module/template/" .. module.thumbnail)
+        else
+            module.preview = love.graphics.newImage("asset/thumbnail.png")
         end
-    end
+    end)
 
-    count = #Modules
+    Engine:start("grid")
 end
 
 function love.resize(width, height)
@@ -91,78 +99,21 @@ function love.resize(width, height)
 end
 
 function love.mousepressed(x, y, button)
-    if Current then
-        return
-    end
-
-    if x >= start.x and x <= (start.x + (size.width + margin) * count)
-        and y >= start.y and y <= (start.y + size.height)
-    then
-        -- selected template item.
-        local index = (math.modf((x - start.x) / (size.width + margin)) + 1)
-        if index < 1 or count < index then
-            error("Invalid index: " .. index)
-        end
-        Current = Modules[index]
-        Current.load()
-    end
+    Engine:queue("click", x, y, button)
 end
 
 function love.keypressed(key, isrepeat)
-    if "escape" == key then
-        if Current then
-            Current.unload()
-            Current = nil
-        else
-            love.event.quit()
-        end
-    elseif "up" == key then
-        if Current and Current.up then
-            Current.up()
-        end
-    elseif "down" == key then
-        if Current and Current.down then
-            Current.down()
-        end
-    elseif "left" == key then
-        if Current and Current.left then
-            Current.left()
-        end
-    elseif "right" == key then
-        if Current and Current.right then
-            Current.right()
-        end
-    end
+    Engine:queue("keypress", key, isrepeat)
+end
+
+function love.update(dt)
+    Engine:pump(dt)
 end
 
 function love.draw()
     love.graphics.setBackgroundColor(136, 177, 247)
-
-    if not Current then
-        Grid.draw(boundingbox)
-        for index, module in pairs(Modules) do
-            local x = start.x + (index - 1) * (size.width + margin)
-            love.graphics.setColor(0, 0, 0, 128)
-            love.graphics.rectangle(
-                "fill",
-                x,
-                start.y,
-                size.width,
-                size.height
-            )
-            love.graphics.setColor(204, 211, 222)
-            love.graphics.printf(
-                module.name,
-                x + margin,
-                start.y + size.height - text,
-                size.width - margin,
-                "center"
-            )
-            love.graphics.draw(module.preview or Thumbnail, x, start.y)
-        end
-    else
-        Current.draw(boundingbox)
-    end
+    -- High priority event, call directly
+    Engine:emit("draw")
 
     local margin = 5
     local consoleBox = {
@@ -173,5 +124,5 @@ function love.draw()
     }
 
     Console:draw(consoleBox)
-    Console:clear()
+    --Console:clear()
 end

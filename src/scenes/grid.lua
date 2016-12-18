@@ -5,20 +5,43 @@
 - Isometric grid drawer.
 ----------------------------------------------------------------------------]]--
 
+local Scene
 -- Shortcut for love.graphics
 local lg
+
 local console
 
 local background = { r = 136, g = 177, b = 247, a = 255 }
 local border = { r = 204, g = 211, b = 222, a = 255 }
 local semiborder = { r = 204, g = 211, b = 222, a = 128 }
+local boundingbox = {
+        left = 0, right = love.graphics.getWidth(),
+        top = 0, bottom = love.graphics.getHeight()
+}
+local margin = 5
+local text = 15
+local start = { x = 100, y = 100 }
+local thumbnailSize = { width = 128, height = 128 + margin + text }
 
-local function init(graphics, output)
+local function init(scene, graphics, output)
+    Scene = scene
     lg = graphics
     console = output
+
+    Scene:subscribe("keypress", "grid", function(key)
+        if key == "up" then
+            thumbnailSize.width = thumbnailSize.width + 10
+            return true
+        elseif key == "down" then
+            thumbnailSize.width = thumbnailSize.width - 10
+            return true
+        end
+
+        return false
+    end)
 end
 
-local function draw(boundingbox)
+local function draw(modules)
     local size = {
         width = boundingbox.right - boundingbox.left,
         height = boundingbox.bottom - boundingbox.top
@@ -69,17 +92,53 @@ local function draw(boundingbox)
         lg.line(from.x, from.y, to.x, to.y)
     end
 
-    console:add("Grid: size = (" .. step.dx .. ", " .. step.dy .. ")")
+
+    local index = 1
+    modules:foreach(function(module)
+        local x = start.x + (index - 1) * (thumbnailSize.width + margin)
+        lg.setColor(0, 0, 0, 128)
+        lg.rectangle(
+            "fill",
+            x,
+            start.y,
+            thumbnailSize.width,
+            thumbnailSize.height
+        )
+        lg.setColor(204, 211, 222)
+        lg.printf(
+            module.name,
+            x + margin,
+            start.y + thumbnailSize.height - text,
+            thumbnailSize.width - margin,
+            "center"
+        )
+        lg.draw(module.preview, x, start.y)
+        index = index + 1
+    end)
+
+    --console:add("Grid: size = (" .. step.dx .. ", " .. step.dy .. ")")
+
+    return true
 end
 
-local function nothing()
+local function click(x, y)
+    if x >= start.x and x <= (start.x + (thumbnailSize.width + margin) * 3)
+        and y >= start.y and y <= (start.y + thumbnailSize.height)
+    then
+        -- selected template item.
+        local index = (math.modf((x - start.x) / (thumbnailSize.width + margin)) + 1)
+        --if index < 1 or #modules < index then
+        --    error("Invalid index: " .. index)
+        --end
+        console:add("Selected module: " .. index)
 
+        return true
+    end
 end
 
 -- Export
 return {
     init = init,
     draw = draw,
-    up = nothing,
-    down = nothing
+    click = click
 }
