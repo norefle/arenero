@@ -29,24 +29,6 @@ function love.load()
         Engine.console:draw(consoleBox)
     end)
 
-    grid.modules = Queue.create()
-
-    local moduleNames = love.filesystem.getDirectoryItems("module")
-    for _, name in pairs(moduleNames) do
-        if love.filesystem.isDirectory("module/" .. name) then
-            grid.modules:push(require("module." .. name))
-        end
-    end
-
-    grid.modules:foreach(function(module)
-        module.init(love.graphics, Engine.console)
-        if module.thumbnail then
-            module.preview = love.graphics.newImage("module/template/" .. module.thumbnail)
-        else
-            module.preview = love.graphics.newImage("asset/thumbnail.png")
-        end
-    end)
-
     Engine:start("grid")
 end
 

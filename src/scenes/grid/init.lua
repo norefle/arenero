@@ -5,7 +5,11 @@
 - Isometric grid drawer.
 ----------------------------------------------------------------------------]]--
 
-local Queue = require "core.queue"
+local Scene
+-- Shortcut for love.graphics
+local lg
+
+local console
 
 local background = { r = 136, g = 177, b = 247, a = 255 }
 local border = { r = 204, g = 211, b = 222, a = 255 }
@@ -33,7 +37,6 @@ end
 
 function create(scene, graphics, output)
     local object = clone(Grid)
-    object.modules = Queue.create()
     object.lg = graphics
     object.console = output
 
@@ -41,21 +44,6 @@ function create(scene, graphics, output)
 end
 
 function Grid:init()
-    local moduleNames = love.filesystem.getDirectoryItems("scenes")
-    for _, name in pairs(moduleNames) do
-        if name ~= self.name then
-            if love.filesystem.isDirectory("scenes/" .. name) then
-                local sceneModule = { name = name }
-                local thumbnail = "scenes/" .. name .. "/asset/thumbnail.png"
-                if not love.filesystem.isFile(thumbnail) then
-                    thumbnail = "asset/thumbnail.png"
-                end
-                sceneModule.preview = love.graphics.newImage(thumbnail)
-                self.modules:push(sceneModule)
-            end
-        end
-    end
-
     self:subscribe("keypress", true, self.name, function(key)
         if key == "up" then
             thumbnailSize.width = thumbnailSize.width + 10
