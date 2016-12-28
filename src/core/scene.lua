@@ -4,18 +4,18 @@
 ----------------------------------------------------------------------------]]--
 
 local Queue = require "core.queue"
-local Scene = {}
+local Scene = { name = "scene" }
 
 function Scene:supports(event)
     return self.subscribers[event] ~= nil
 end
 
-function Scene:subscribe(event, name, callback)
+function Scene:subscribe(event, terminal, name, callback)
     if not self.subscribers[event] then
         self.subscribers[event] = Queue.create()
     end
 
-    local listener = { name = name, fn = callback }
+    local listener = { name = name, terminal = terminal, fn = callback }
     self.subscribers[event]:push(listener)
 end
 

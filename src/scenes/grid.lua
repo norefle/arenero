@@ -23,12 +23,28 @@ local text = 15
 local start = { x = 100, y = 100 }
 local thumbnailSize = { width = 128, height = 128 + margin + text }
 
-local function init(scene, graphics, output)
-    Scene = scene
-    lg = graphics
-    console = output
+local Grid = { name = "grid" }
 
-    Scene:subscribe("keypress", "grid", function(key)
+local function clone(base)
+    local object = { }
+    for key, value in pairs(base) do
+        object[key] = value
+    end
+
+    return object
+end
+
+
+function create(scene, graphics, output)
+    local object = clone(Grid)
+    object.lg = graphics
+    object.console = output
+
+    return setmetatable(object, { __index = scene })
+end
+
+function Grid:init()
+    self:subscribe("keypress", true, self.name, function(key)
         if key == "up" then
             thumbnailSize.width = thumbnailSize.width + 10
             return true
@@ -39,9 +55,17 @@ local function init(scene, graphics, output)
 
         return false
     end)
+
+    self:subscribe("click", true, self.name, function(...)
+        return self:click(...)
+    end)
+
+    self:subscribe("draw", false, self.name, function(...)
+        return self:draw(...)
+    end)
 end
 
-local function draw(modules)
+function Grid:draw()
     local size = {
         width = boundingbox.right - boundingbox.left,
         height = boundingbox.bottom - boundingbox.top
@@ -61,12 +85,12 @@ local function draw(modules)
     local bottom = { x = top.x, y = top.y + 2 * totalHeight }
     local right = { x = center.x + width, y = center.y }
 
-    lg.setColor(border.r, border.g, border.b, border.a)
+    self.lg.setColor(border.r, border.g, border.b, border.a)
 
-    lg.line(top.x, top.y, left.x, left.y)
-    lg.line(left.x, left.y, bottom.x, bottom.y)
-    lg.line(bottom.x, bottom.y, right.x, right.y)
-    lg.line(right.x, right.y, top.x, top.y)
+    self.lg.line(top.x, top.y, left.x, left.y)
+    self.lg.line(left.x, left.y, bottom.x, bottom.y)
+    self.lg.line(bottom.x, bottom.y, right.x, right.y)
+    self.lg.line(right.x, right.y, top.x, top.y)
 
     local steps = 80
     local step = { dx = width / steps, dy = totalHeight / steps }
@@ -75,53 +99,51 @@ local function draw(modules)
         local from = { x = left.x + step.dx * i, y = left.y + step.dy * i }
         local to = { x = top.x + step.dx * i, y = top.y + step.dy * i }
         if 0 == i % 8 then
-            lg.setColor(border.r, border.g, border.b, border.a)
+            self.lg.setColor(border.r, border.g, border.b, border.a)
         else
-            lg.setColor(semiborder.r, semiborder.g, semiborder.b, semiborder.a)
+            self.lg.setColor(semiborder.r, semiborder.g, semiborder.b, semiborder.a)
         end
-        lg.line(from.x, from.y, to.x, to.y)
+        self.lg.line(from.x, from.y, to.x, to.y)
     end
     for j = 1, steps, 1 do
         local from = { x = left.x + step.dx * j, y = left.y - step.dy * j }
         local to = { x = bottom.x + step.dx * j, y = bottom.y - step.dy * j }
         if 0 == j % 8 then
-            lg.setColor(border.r, border.g, border.b, border.a)
+            self.lg.setColor(border.r, border.g, border.b, border.a)
         else
-            lg.setColor(semiborder.r, semiborder.g, semiborder.b, semiborder.a)
+            self.lg.setColor(semiborder.r, semiborder.g, semiborder.b, semiborder.a)
         end
-        lg.line(from.x, from.y, to.x, to.y)
+        self.lg.line(from.x, from.y, to.x, to.y)
     end
 
 
     local index = 1
-    modules:foreach(function(module)
+    self.modules:foreach(function(module)
         local x = start.x + (index - 1) * (thumbnailSize.width + margin)
-        lg.setColor(0, 0, 0, 128)
-        lg.rectangle(
+        self.lg.setColor(0, 0, 0, 128)
+        self.lg.rectangle(
             "fill",
             x,
             start.y,
             thumbnailSize.width,
             thumbnailSize.height
         )
-        lg.setColor(204, 211, 222)
-        lg.printf(
+        self.lg.setColor(204, 211, 222)
+        self.lg.printf(
             module.name,
             x + margin,
             start.y + thumbnailSize.height - text,
             thumbnailSize.width - margin,
             "center"
         )
-        lg.draw(module.preview, x, start.y)
+        self.lg.draw(module.preview, x, start.y)
         index = index + 1
     end)
-
-    --console:add("Grid: size = (" .. step.dx .. ", " .. step.dy .. ")")
 
     return true
 end
 
-local function click(x, y)
+function Grid:click(x, y)
     if x >= start.x and x <= (start.x + (thumbnailSize.width + margin) * 3)
         and y >= start.y and y <= (start.y + thumbnailSize.height)
     then
@@ -130,15 +152,13 @@ local function click(x, y)
         --if index < 1 or #modules < index then
         --    error("Invalid index: " .. index)
         --end
-        console:add("Selected module: " .. index)
+        self.console:add("Selected module: " .. index)
 
         return true
     end
+
+    return false
 end
 
 -- Export
-return {
-    init = init,
-    draw = draw,
-    click = click
-}
+return { create = create }

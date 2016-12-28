@@ -3,13 +3,19 @@
 
 local Scene = require "core.scene"
 local Queue = require "core.queue"
+local Console = require "core.console"
 
 local Core = {}
 
 function Core:scene(name)
     local selected = self.scenes[name]
     if not selected then
-        selected = Scene.create(name)
+        local loaded, sceneObject = pcall(require, "scenes." .. name)
+        if not loaded then
+            error("Invalid scene name: " .. tostring(name), 2)
+        end
+        selected = sceneObject.create(Scene.create(name), self.graphics, self.console)
+        selected:init()
         self.scenes[name] = selected
     end
 
@@ -26,32 +32,28 @@ end
 
 function Core:emit(event, ...)
     local args = { ... }
-    local processed = false
+    local continue = true
     if self.active and self.active:supports(event) then
         self.active.subscribers[event]:foreach(function(listener)
-            local success = listener.fn(unpack(args))
-            if not processed then
-                processed = success
+            if continue then
+                local processed = listener.fn(unpack(args))
+                continue = not (listener.terminal and processed)
             end
         end)
     end
 
-    if not processed and self.subscribers[event] then
+    if continue and self.subscribers[event] then
         self.subscribers[event]:foreach(function(listener)
-            local success = listener.fn(unpack(args))
-            if not processed then
-                processed = success
+            if continue then
+                local processed = listener.fn(unpack(args))
+                continue = not (listener.terminal and processed)
             end
         end)
-    end
-
-    if not processed then
-        error("There is no subscriber for the event yet: " .. event, 2)
     end
 end
 
-function Core:subscribe(event, name, callback)
-    local listener = { name = name, fn = callback }
+function Core:subscribe(event, terminal, name, callback)
+    local listener = { name = name, terminal = terminal, fn = callback }
     local subscribers = self.subscribers[event]
     if not subscribers then
         subscribers = Queue.create()
@@ -95,7 +97,9 @@ create = function(scenes)
     local object = {
         scenes = scenes,
         subscribers = {},
-        events = Queue.create()
+        events = Queue.create(),
+        console = Console.create(),
+        graphics = love.graphics
     }
 
     return setmetatable(object, { __index = Core } )
