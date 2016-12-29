@@ -19,8 +19,8 @@ Tileset.width = 0
 Tileset.height = 0
 
 local boundingbox = {
-        left = 0, right = love.graphics.getWidth(),
-        top = 0, bottom = love.graphics.getHeight()
+    left = 0, right = love.graphics.getWidth(),
+    top = 0, bottom = love.graphics.getHeight()
 }
 
 local Map = {}
@@ -106,6 +106,23 @@ function Module:init()
     self:subscribe("draw", false, self.name, function(dt)
         self:draw(dt, boundingbox)
     end)
+
+    self:subscribe("keypress", true, self.name, function(dt, key)
+        if key == "up" then
+            return self:up(dt)
+        elseif key == "down" then
+            return self:down(dt)
+        elseif key == "left" then
+            return self:left(dt)
+        elseif key == "right" then
+            return self:right(dt)
+        elseif key == "escape" then
+            self.engine:queue("start", "grid")
+            return true
+        end
+
+        return false
+    end)
 end
 
 local function drawTile(name, tileType, box)
@@ -170,21 +187,24 @@ end
 
 function Module:up(dt)
     self.map:moveUp()
+    return true
 end
 
 function Module:down(dt)
     self.map:moveDown()
+    return true
 end
 
 function Module:left(dt)
     self.map:moveLeft()
+    return true
 end
 
 function Module:right(dt)
     self.map:moveRight()
+    return true
 end
 
---[[------------------------------------------------------------------------]]--
 return {
 
 create = function()
