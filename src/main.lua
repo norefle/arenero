@@ -16,20 +16,19 @@ local consoleBox = {
 
 function love.load()
     love.keyboard.setKeyRepeat(true)
+    Engine:init()
 
-    local grid = Engine:scene("grid")
-
-    Engine:subscribe("keypress", "main", function(key)
+    Engine:subscribe("keypress", true, "main", function(dt, key)
         if key == "escape" then
             love.event.quit()
             return true
         end
     end)
-    Engine:subscribe("draw", false, "console", function()
-        Engine.console:draw(consoleBox)
+    Engine:subscribe("draw", false, "console", function(dt)
+        Engine.console:draw(dt, consoleBox)
     end)
 
-    Engine:start("grid")
+    Engine:queue("start", "grid")
 end
 
 function love.resize(width, height)
@@ -52,5 +51,5 @@ end
 function love.draw()
     love.graphics.setBackgroundColor(136, 177, 247)
     -- High priority event, call directly
-    Engine:emit("draw")
+    Engine:emit("draw", 0)
 end

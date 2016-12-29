@@ -16,6 +16,14 @@ function Queue:push(object)
     end
 end
 
+function Queue:at(index)
+    if index < 0 or #self.data < index then
+        error("Invalid argument (out of range): " .. index, 2)
+    end
+
+    return self.data[index]
+end
+
 function Queue:foreach(fn)
     for _, value in pairs(self.data) do
         fn(value)

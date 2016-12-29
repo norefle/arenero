@@ -19,25 +19,14 @@ local text = 15
 local start = { x = 100, y = 100 }
 local thumbnailSize = { width = 128, height = 128 + margin + text }
 
-local Grid = { name = "grid" }
+local Grid = { }
 
-local function clone(base)
-    local object = { }
-    for key, value in pairs(base) do
-        object[key] = value
-    end
+function create()
+    local object = {
+        modules = Queue.create()
+    }
 
-    return object
-end
-
-
-function create(scene, graphics, output)
-    local object = clone(Grid)
-    object.modules = Queue.create()
-    object.lg = graphics
-    object.console = output
-
-    return setmetatable(object, { __index = scene })
+    return setmetatable(object, { __index = Grid })
 end
 
 function Grid:init()
@@ -56,7 +45,7 @@ function Grid:init()
         end
     end
 
-    self:subscribe("keypress", true, self.name, function(key)
+    self:subscribe("keypress", true, self.name, function(dt, key)
         if key == "up" then
             thumbnailSize.width = thumbnailSize.width + 10
             return true
@@ -155,16 +144,16 @@ function Grid:draw()
     return true
 end
 
-function Grid:click(x, y)
+function Grid:click(dt, x, y)
     if x >= start.x and x <= (start.x + (thumbnailSize.width + margin) * 3)
         and y >= start.y and y <= (start.y + thumbnailSize.height)
     then
         -- selected template item.
         local index = (math.modf((x - start.x) / (thumbnailSize.width + margin)) + 1)
-        --if index < 1 or #modules < index then
-        --    error("Invalid index: " .. index)
-        --end
-        self.console:add("Selected module: " .. index)
+        local selected = self.modules:at(index)
+        self.console:add("Selected module: " .. index .. " is " .. selected.name)
+
+        self.engine:queue("start", selected.name)
 
         return true
     end

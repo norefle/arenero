@@ -4,8 +4,7 @@
 - Drawing tiled map in isomeric projection.
 ----------------------------------------------------------------------------]]--
 
-local lg -- graphic subsystem.
-local out -- debug output
+local lg = love.graphics
 
 local C = {}
 C.TILE_WIDTH = 64
@@ -19,8 +18,12 @@ Tileset.tiles = {}
 Tileset.width = 0
 Tileset.height = 0
 
+local boundingbox = {
+        left = 0, right = love.graphics.getWidth(),
+        top = 0, bottom = love.graphics.getHeight()
+}
+
 local Map = {}
-local map = nil
 
 function Map.new(x, y, level, width, height)
     local object = {}
@@ -83,14 +86,9 @@ end
 
 local Module = {}
 
-function Module.init(graphics, console)
-    lg = graphics
-    out = console
-end
-
-function Module.load()
-    local err, level = pcall(require, "module.map.asset.level.level_1")
-    Tileset.set = lg.newImage("module/map/asset/" .. level.tileset.image)
+function Module:init()
+    local err, level = pcall(require, "scenes.map.asset.level.level_1")
+    Tileset.set = self.lg.newImage("scenes/map/asset/" .. level.tileset.image)
     Tileset.width = level.tileset.tilewidth
     Tileset.height = level.tileset.tileheight
     for i = 1, level.tileset.tilecount do
@@ -103,7 +101,11 @@ function Module.load()
     end
 
     -- checks
-    map = Map.new(0, 0, level, lg.getWidth(), lg.getHeight())
+    self.map = Map.new(0, 0, level, lg.getWidth(), lg.getHeight())
+
+    self:subscribe("draw", false, self.name, function(dt)
+        self:draw(dt, boundingbox)
+    end)
 end
 
 local function drawTile(name, tileType, box)
@@ -131,18 +133,18 @@ local function drawTile(name, tileType, box)
     end
 end
 
-function Module.draw(boundingbox)
+function Module:draw(dt, boundingbox)
     local counter = 1
-    local base = { row = map.north.row, col = map.north.col }
-    for row = 0, map.rows + 1 do
+    local base = { row = self.map.north.row, col = self.map.north.col }
+    for row = 0, self.map.rows + 1 do
         local evenRow = (0 == row % 2)
-        local cols = map.cols
+        local cols = self.map.cols
         local left = evenRow and boundingbox.left - (C.TILE_WIDTH / 2) or boundingbox.left
         for col = cols, 1, -1 do
             local offset = cols - col
             local tail = base.col - offset
-            local index = (base.row - offset - 1) * map.dataWidth + tail
-            local tile = map.data[index]
+            local index = (base.row - offset - 1) * self.map.dataWidth + tail
+            local tile = self.map.data[index]
             if tile and 0 < tail then
                 drawTile(
                     tostring(index),
@@ -162,43 +164,31 @@ function Module.draw(boundingbox)
 
     local x = math.modf(love.mouse.getX() / C.TILE_WIDTH) + 1
     local y = math.modf(love.mouse.getY() / (C.TILE_HEIGHT / 2)) + 1
-    out:add(string.format("geometry %dx%d", map.rows, map.cols))
-    out:add(string.format("mouse (%d, %d) in tile (%f, %f)", x, y, x - y, (x + y) / 2))
+    self.console:add(string.format("geometry %dx%d", self.map.rows, self.map.cols))
+    self.console:add(string.format("mouse (%d, %d) in tile (%f, %f)", x, y, x - y, (x + y) / 2))
 end
 
-function Module.unload()
-    map = nil
+function Module:up(dt)
+    self.map:moveUp()
 end
 
-function Module.up()
-    map:moveUp()
+function Module:down(dt)
+    self.map:moveDown()
 end
 
-function Module.down()
-    map:moveDown()
+function Module:left(dt)
+    self.map:moveLeft()
 end
 
-function Module.left()
-    map:moveLeft()
-end
-
-function Module.right()
-    map:moveRight()
+function Module:right(dt)
+    self.map:moveRight()
 end
 
 --[[------------------------------------------------------------------------]]--
 return {
 
-name = "Map",
-description = "Isometric tiled map",
-version = "0.1.0",
-init = Module.init,
-load = Module.load,
-unload = Module.unload,
-draw = Module.draw,
-up = Module.up,
-down = Module.down,
-left = Module.left,
-right = Module.right,
+create = function()
+    return setmetatable({}, { __index = Module })
+end
 
 }

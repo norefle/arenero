@@ -13,7 +13,7 @@ function Console:add(string)
     self.data:push(string)
 end
 
-function Console:draw(boundingbox)
+function Console:draw(dt, boundingbox)
     local margin = 5
     local height = 15
     local size = {

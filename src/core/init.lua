@@ -4,8 +4,14 @@
 local Scene = require "core.scene"
 local Queue = require "core.queue"
 local Console = require "core.console"
+local SceneManager = require "core.scenemanager"
 
 local Core = {}
+
+function Core:init()
+    self.scenemanager = SceneManager.create(self)
+    self.scenemanager:init()
+end
 
 function Core:scene(name)
     local selected = self.scenes[name]
@@ -14,7 +20,7 @@ function Core:scene(name)
         if not loaded then
             error("Invalid scene name: " .. tostring(name), 2)
         end
-        selected = sceneObject.create(Scene.create(name), self.graphics, self.console)
+        selected = Scene.create(self, name, sceneObject.create(), self.console)
         selected:init()
         self.scenes[name] = selected
     end
@@ -23,15 +29,22 @@ function Core:scene(name)
 end
 
 function Core:start(name)
-    local selected = self.scenes[name]
+    local selected = self:scene(name)
     if selected then
-        -- Emit event about closing scene
         self.active = selected
     end
 end
 
-function Core:emit(event, ...)
-    local args = { ... }
+function Core:stop()
+    if self.active then
+        self:unsubscribe(self.active.name)
+        self.scenes[self.active.name] = nil
+        self.active = nil
+    end
+end
+
+function Core:emit(event, dt, ...)
+    local args = { dt, ... }
     local continue = true
     if self.active and self.active:supports(event) then
         self.active.subscribers[event]:foreach(function(listener)
@@ -86,7 +99,7 @@ function Core:pump(dt)
     local events = self.events
     self.events = Queue.create()
     events:foreach(function(event)
-        self:emit(event.name, unpack(event.args))
+        self:emit(event.name, dt, unpack(event.args))
     end)
 end
 

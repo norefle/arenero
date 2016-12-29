@@ -29,13 +29,31 @@ function Scene:unsubscribe(event, name)
     end)
 end
 
+local function clone(base)
+    local object = { }
+    for key, value in pairs(base) do
+        object[key] = value
+    end
+
+    local base_mt = getmetatable(base)
+    if base_mt then
+        for key, value in pairs(base_mt.__index) do
+            object[key] = value
+        end
+    end
+
+    return object
+end
+
 return {
 
-create = function(name)
-    local object = {
-        name = name,
-        subscribers = {}
-    }
+create = function(engine, name, sceneObject, output)
+    local object = clone(sceneObject)
+    object.engine = engine
+    object.name = name
+    object.lg = love.graphics
+    object.console = output
+    object.subscribers = {}
 
     return setmetatable(object, { __index = Scene })
 end
