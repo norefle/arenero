@@ -32,6 +32,11 @@ function Core:start(name)
     local selected = self:scene(name)
     if selected then
         self.active = selected
+        self.console:clear()
+        -- todo replace with event
+        if self.active.start then
+            self.active:start()
+        end
     end
 end
 
