@@ -26,7 +26,7 @@ function Manager:begin(dt, name)
     local selected = self.engine:scene(name)
     if selected then
         self.scene = selected
-        self.engine:queue("loading", 0)
+        self.engine:queue("loading", 100)
     end
 
     return true

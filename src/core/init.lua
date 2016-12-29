@@ -18,7 +18,7 @@ function Core:scene(name)
     if not selected then
         local loaded, sceneObject = pcall(require, "scenes." .. name)
         if not loaded then
-            error("Invalid scene name: " .. tostring(name), 2)
+            error("Invalid scene name: " .. tostring(name) .. " " .. sceneObject, 2)
         end
         selected = Scene.create(self, name, sceneObject.create(), self.console)
         selected:init()
