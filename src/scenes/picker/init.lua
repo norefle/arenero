@@ -6,14 +6,17 @@
 - tile size picking.
 ----------------------------------------------------------------------------]]--
 
-local lg
-local console
 
 local background = { r = 0, g = 0, b = 0, a = 200 }
 local border = { r = 204, g = 211, b = 222, a = 255 }
 local tileWidth = 64
 local margin = 5
+local boundingbox = {
+    left = 0, right = love.graphics.getWidth(),
+    top = 0, bottom = love.graphics.getHeight()
+}
 
+local Module = {}
 
 --- Calculates tile geometry based on its width.
 -- @return tile = { width, height }
@@ -23,11 +26,6 @@ local function calculate(width)
     local halfHeight = halfWidth * math.tan(angle)
 
     return { width = width, height = halfHeight * 2 }
-end
-
-local function init(graphics, output)
-    lg = graphics
-    console = output
 end
 
 -- Generates array of coordinates for connecting them into closed tile border.
@@ -50,7 +48,25 @@ local function getBorderCoordinate(x, y, width, height)
         rect.left, center.y
 end
 
-local function draw(boundingbox)
+function Module:init()
+    self:subscribe("draw", false, self.name, function(dt)
+        self:draw(dt, boundingbox)
+    end)
+    self:subscribe("keypress", true, self.name, function(dt, key)
+        if key == "up" then
+            return self:up(dt)
+        elseif key == "down" then
+            return self:down(dt)
+        elseif key == "escape" then
+            self.engine:queue("start", "grid")
+            return true
+        end
+
+        return false
+    end)
+end
+
+function Module:draw(dt, boundingbox)
     local tile = calculate(tileWidth)
     local boxSize = {
         width = boundingbox.right - boundingbox.left,
@@ -69,40 +85,38 @@ local function draw(boundingbox)
         height = tile.height + 2 * margin
     }
 
-    lg.setColor(background.r, background.g, background.b, background.a)
-    lg.rectangle("fill", rect.x - margin, rect.y - margin, rect.width, rect.height)
+    self.lg.setColor(background.r, background.g, background.b, background.a)
+    self.lg.rectangle("fill", rect.x - margin, rect.y - margin, rect.width, rect.height)
 
-    lg.setColor(border.r, border.g, border.b, border.a)
-    lg.line(getBorderCoordinate(rect.x, rect.y, tile.width, tile.height))
-    lg.line(getBorderCoordinate(
+    self.lg.setColor(border.r, border.g, border.b, border.a)
+    self.lg.line(getBorderCoordinate(rect.x, rect.y, tile.width, tile.height))
+    self.lg.line(getBorderCoordinate(
         rect.x + tile.width + margin,
         rect.y + (tile.height - tile.width / 2) / 2, -- centering in the background rect
         tile.width,
         tile.width / 2 -- 2:1 tile height is width / 2
     ))
 
-    console:add(string.format("iso = (%f, %f)", tile.width, tile.height))
-    console:add(string.format("2:1 = (%f, %f)", tile.width, tile.width / 2))
+    self.console:add(string.format("iso = (%f, %f)", tile.width, tile.height))
+    self.console:add(string.format("2:1 = (%f, %f)", tile.width, tile.width / 2))
 end
 
-local function up()
+function Module:up(dt)
     tileWidth = tileWidth + 2
+    return true
 end
 
-local function down()
+function Module:down(dt)
     tileWidth = tileWidth - 2
+    return true
 end
 
 
 -- Export
 return {
-    name = "Tile picker",
-    description = "Provides functionality to select tile size",
-    version = "0.1.1",
-    init = init,
-    load = function() end,
-    draw = draw,
-    unload = function() end,
-    up = up,
-    down = down,
+
+create = function()
+    return setmetatable({}, { __index = Module })
+end
+
 }
