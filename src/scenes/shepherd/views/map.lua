@@ -1,12 +1,30 @@
+--[[----------------------------------------------------------------------------
+- @file views/map.lua
+----------------------------------------------------------------------------]]--
+
+local Utils = require "core.utils"
+
 local Config = {
 
 tiles = { "blank" },
 size = 64,
-viewport = { columns = 10, rows = 5 },
+viewport = { columns = 10, rows = 7 },
 
 }
 
 local Map = { }
+
+--- @todo Replace with proper tile assets
+local function tile(x, y, type)
+    local tiles = {
+        Utils.color(250, 250, 250, 128), -- 1
+        Utils.color(250, 64, 64, 128),   -- 2
+        Utils.color(64, 250, 64, 128),   -- 3
+        Utils.color(64, 64, 250, 128),   -- 4
+    }
+    love.graphics.setColor(tiles[type]:unpack())
+    love.graphics.rectangle("fill", x, y, Config.size, Config.size)
+end
 
 function Map:draw(boundingbox)
     local screenWidth = boundingbox.right - boundingbox.left
@@ -24,8 +42,8 @@ function Map:draw(boundingbox)
         local column = index % Config.viewport.columns
         local x = offset.x + column * Config.size
         local y = offset.y + row * Config.size
-        love.graphics.setColor(255, 250, 245, 128)
-        love.graphics.rectangle("fill", x, y, Config.size, Config.size)
+        tile(x, y, self.model.tiles[i])
+        -- Debug
         love.graphics.setColor(0, 0, 0, 64)
         love.graphics.printf(i, x, y + 15, Config.size, "center")
     end

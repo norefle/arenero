@@ -1,3 +1,7 @@
+--[[----------------------------------------------------------------------------
+- @file states/map.lua
+----------------------------------------------------------------------------]]--
+
 local Map = {}
 
 return {
@@ -10,7 +14,7 @@ create = function(width, height)
     object.current = 1
 
     for i = 1, width * height, 1 do
-        object.tiles[#object.tiles + 1] = 0
+        object.tiles[#object.tiles + 1] = (i % 4) + 1
     end
 
     return setmetatable(object, { __index = Map })
