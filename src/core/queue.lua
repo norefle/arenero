@@ -54,4 +54,25 @@ function Queue:filter(predicate)
     return filtered
 end
 
+local Range = { }
+
+function Range.create(queue, from, to)
+    local object = { data = queue, from = from, to = to }
+    return setmetatable(object, { __index = Range })
+end
+
+function Range:length()
+    return (self.to - self.from) + 1
+end
+
+function Range:foreach(fn)
+    for i = self.from, self.to, 1 do
+        fn(self.data:at(i), i - self.from + 1)
+    end
+end
+
+function Queue:range(from, to)
+    return Range.create(self, from, to)
+end
+
 return { create = create }
