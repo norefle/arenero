@@ -1,36 +1,19 @@
 --[[----------------------------------------------------------------------------
-- @brief template module.
--
-- The main purpose of the template module is to demonstrate
-- the idea of implementation of modules for Arenero.
+- @brief template scene.
 ----------------------------------------------------------------------------]]--
 
---- @todo extract to core
+local Utils = require "core.utils"
 
-local Color = {}
-
-function Color.new(r, g, b, a)
-    -- black opaque by default
-    return { r = r or 0, g = g or 0, b = b or 0, a = a or 255 }
-end
-
-function Color.unpack(color)
-    return color.r, color.g, color.b, color.a
-end
-
---- Module's configuration.
--- @note In the real world module it could/should be separate file.
 local Config = {}
 
 -- Global/exported configurations.
 Config.name = "Template"
 Config.description = "Hello world for Arenero."
 Config.version = "0.1.0"
-Config.thumbnail = "asset/thumbnail.png"
 
 -- Local configurations.
-Config.backgroundColor = Color.new(0, 0, 0, 128)
-Config.textColor = Color.new(204, 211, 222, 255)
+Config.backgroundColor = Utils.color(0, 0, 0, 128)
+Config.textColor = Utils.color(204, 211, 222, 255)
 Config.textMargin = 5
 
 -- Module itself.
@@ -57,21 +40,18 @@ function Module:start()
 end
 
 function Module:draw(dt, boundingbox)
-    -- Get size of the boundaries.
-    local size = {
-        width = boundingbox.right - boundingbox.left,
-        height = boundingbox.bottom - boundingbox.top
-    }
+    local width = boundingbox.right - boundingbox.left
+    local height = boundingbox.bottom - boundingbox.top
 
     -- Draw semitransparent black rectangle.
-    self.lg.setColor(Color.unpack(Config.backgroundColor))
-    self.lg.rectangle("fill", boundingbox.left, boundingbox.top, size.width, size.height)
+    self.lg.setColor(Config.backgroundColor:unpack())
+    self.lg.rectangle("fill", boundingbox.left, boundingbox.top, width, height)
     -- Write "Hello world" in the middle of the rectangle
-    self.lg.setColor(Color.unpack(Config.textColor))
+    self.lg.setColor(Config.textColor:unpack())
     self.lg.printf(
         "Hello world",
         boundingbox.left + Config.textMargin,
-        boundingbox.top + size.height / 2,
+        boundingbox.top + height / 2,
         boundingbox.right - Config.textMargin,
         "center"
     )
