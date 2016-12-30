@@ -3,6 +3,7 @@
 ----------------------------------------------------------------------------]]--
 
 local Queue = require "core.queue"
+local Utils = require "core.utils"
 local MapModel = require "scenes.shepherd.states.map"
 local MapView = require "scenes.shepherd.views.map"
 
@@ -12,6 +13,29 @@ function Shepherd:init()
     self:subscribe("keypress", true, self.name, function(dt, key)
         if key == "escape" then
             self.engine:queue("start", "grid")
+            return true
+        elseif key == "left"
+            or key == "right"
+            or key == "up"
+            or key == "down"
+        then
+            local map = self.models["map"]
+            local position = map.current
+            local size = map.columns * map.rows
+            if key == "left" then
+                position = Utils.clap(position, 1, position - 1)
+            elseif key == "right" then
+                position = Utils.clap(position, position + 1, size)
+            elseif key == "up" then
+                position = Utils.clap(position, 1, position - map.columns)
+            elseif key == "down" then
+                position = Utils.clap(position, position + map.columns, size)
+            end
+
+            map.current = position
+
+            self.console:add("Position: " .. position)
+
             return true
         end
 
@@ -37,7 +61,7 @@ create = function()
         views = Queue.create()
     }
 
-    local map = MapModel.create(100, 100)
+    local map = MapModel.create(20, 20)
     object.models["map"] = map
     object.views:push(MapView.create(map))
 

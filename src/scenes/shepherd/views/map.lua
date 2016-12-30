@@ -15,7 +15,7 @@ viewport = { columns = 10, rows = 7 },
 local Map = { }
 
 --- @todo Replace with proper tile assets
-local function tile(x, y, type)
+local function drawTile(x, y, type)
     local tiles = {
         Utils.color(250, 250, 250, 128), -- 1
         Utils.color(250, 64, 64, 128),   -- 2
@@ -31,21 +31,27 @@ function Map:draw(boundingbox)
     local screenHeight = boundingbox.bottom - boundingbox.top
     local viewportWidth = Config.viewport.columns * Config.size
     local viewportHeight = Config.viewport.rows * Config.size
-    local offset = {
+    local screenOffset = {
         x = math.modf((screenWidth - viewportWidth) / 2, 1),
         y = math.modf((screenHeight - viewportHeight) / 2, 1)
     }
 
-    for i = self.viewport.from, self.viewport.to, 1 do
-        local index = i - 1
-        local row = math.modf(index / Config.viewport.columns, 2)
-        local column = index % Config.viewport.columns
-        local x = offset.x + column * Config.size
-        local y = offset.y + row * Config.size
-        tile(x, y, self.model.tiles[i])
-        -- Debug
-        love.graphics.setColor(0, 0, 0, 64)
-        love.graphics.printf(i, x, y + 15, Config.size, "center")
+    local firstRow = math.modf(self.model.current / self.model.rows, 1) + 1
+    local firstColumn = math.modf((self.model.current - 1) % self.model.rows, 1) + 1
+    local rowsInViewport = math.min(self.model.rows - firstRow, Config.viewport.rows)
+    for i = firstRow, firstRow + rowsInViewport, 1 do
+        -- width - current - 1, where -1 is because current starts from 1
+        local width = math.min(self.model.columns - firstColumn, Config.viewport.columns)
+        local offset = (i - 1) * self.model.columns + (firstColumn - 1)
+        local row = self.model.tiles:range(offset + 1, offset + 1 + width)
+        row:foreach(function(tile, index)
+            local x = screenOffset.x + (index - 1) * Config.size
+            local y = screenOffset.y + (i - firstRow) * Config.size
+            drawTile(x, y, tile)
+            -- Debug
+            love.graphics.setColor(0, 0, 0, 64)
+            love.graphics.printf(offset + index, x, y + 15, Config.size, "center")
+        end)
     end
 end
 
