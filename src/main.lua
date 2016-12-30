@@ -14,6 +14,9 @@ function love.load()
         if key == "escape" then
             love.event.quit()
             return true
+        elseif key == "backspace" then
+            Engine.console:clear()
+            return true
         end
     end)
 
