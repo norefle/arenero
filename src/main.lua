@@ -2,16 +2,8 @@ local Engine = require("core").create()
 local Queue = require "core.queue"
 
 local boundingbox = {
-        left = 0, right = love.graphics.getWidth(),
-        top = 0, bottom = love.graphics.getHeight()
-}
-
-local margin = 5
-local consoleBox = {
-        left = margin,
-        right = boundingbox.right / 2,
-        top = (boundingbox.bottom - margin) - boundingbox.bottom / 6,
-        bottom = boundingbox.bottom - margin
+    left = 0, right = love.graphics.getWidth(),
+    top = 0, bottom = love.graphics.getHeight()
 }
 
 function love.load()
@@ -23,9 +15,6 @@ function love.load()
             love.event.quit()
             return true
         end
-    end)
-    Engine:subscribe("draw", false, "console", function(dt)
-        Engine.console:draw(dt, consoleBox)
     end)
 
     Engine:queue("start", "grid")
@@ -51,5 +40,5 @@ end
 function love.draw()
     love.graphics.setBackgroundColor(136, 177, 247)
     -- High priority event, call directly
-    Engine:emit("draw", 0)
+    Engine:emit("draw", 0, boundingbox)
 end

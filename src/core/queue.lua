@@ -24,6 +24,10 @@ function Queue:at(index)
     return self.data[index]
 end
 
+function Queue:length()
+    return #self.data
+end
+
 function Queue:foreach(fn)
     for _, value in pairs(self.data) do
         fn(value)

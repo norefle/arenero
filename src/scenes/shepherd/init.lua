@@ -8,11 +8,6 @@ local MapView = require "scenes.shepherd.views.map"
 
 local Shepherd = {}
 
-local boundingbox = {
-    left = 0, right = love.graphics.getWidth(),
-    top = 0, bottom = love.graphics.getHeight()
-}
-
 function Shepherd:init()
     self:subscribe("keypress", true, self.name, function(dt, key)
         if key == "escape" then
@@ -23,12 +18,12 @@ function Shepherd:init()
         return false
     end)
 
-    self:subscribe("draw", false, self.name, function(dt)
-        self:draw()
+    self:subscribe("draw", false, self.name, function(...)
+        self:draw(...)
     end)
 end
 
-function Shepherd:draw()
+function Shepherd:draw(dt, boundingbox)
     self.views:foreach(function(view)
         view:draw(boundingbox)
     end)

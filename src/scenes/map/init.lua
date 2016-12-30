@@ -18,11 +18,6 @@ Tileset.tiles = {}
 Tileset.width = 0
 Tileset.height = 0
 
-local boundingbox = {
-    left = 0, right = love.graphics.getWidth(),
-    top = 0, bottom = love.graphics.getHeight()
-}
-
 local Map = {}
 
 function Map.new(x, y, level, width, height)
@@ -103,8 +98,8 @@ function Module:init()
     -- checks
     self.map = Map.new(0, 0, level, lg.getWidth(), lg.getHeight())
 
-    self:subscribe("draw", false, self.name, function(dt)
-        self:draw(dt, boundingbox)
+    self:subscribe("draw", false, self.name, function(...)
+        self:draw(...)
     end)
 
     self:subscribe("keypress", true, self.name, function(dt, key)

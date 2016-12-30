@@ -11,6 +11,10 @@ local Core = {}
 function Core:init()
     self.scenemanager = SceneManager.create(self)
     self.scenemanager:init()
+    self.console = Console.create(600, 200)
+    self:subscribe("draw", false, "console", function(...)
+        self.console:draw(...)
+    end)
 end
 
 function Core:scene(name)
@@ -116,7 +120,6 @@ create = function(scenes)
         scenes = scenes,
         subscribers = {},
         events = Queue.create(),
-        console = Console.create(),
         graphics = love.graphics
     }
 

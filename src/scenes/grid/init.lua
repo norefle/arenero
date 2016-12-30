@@ -5,56 +5,41 @@
 - Isometric grid drawer.
 ----------------------------------------------------------------------------]]--
 
-local Scene
--- Shortcut for love.graphics
-local lg
-
-local console
+local Queue = require "core.queue"
 
 local background = { r = 136, g = 177, b = 247, a = 255 }
 local border = { r = 204, g = 211, b = 222, a = 255 }
 local semiborder = { r = 204, g = 211, b = 222, a = 128 }
-local boundingbox = {
-        left = 0, right = love.graphics.getWidth(),
-        top = 0, bottom = love.graphics.getHeight()
-}
 local margin = 5
 local text = 15
 local start = { x = 100, y = 100 }
 local thumbnailSize = { width = 128, height = 128 + margin + text }
 
-local Grid = { name = "grid" }
+local Grid = { }
 
-local function clone(base)
-    local object = { }
-    for key, value in pairs(base) do
-        object[key] = value
-    end
+function create()
+    local object = {
+        modules = Queue.create()
+    }
 
-    return object
-end
-
-
-function create(scene, graphics, output)
-    local object = clone(Grid)
-    object.lg = graphics
-    object.console = output
-
-    return setmetatable(object, { __index = scene })
+    return setmetatable(object, { __index = Grid })
 end
 
 function Grid:init()
-    self:subscribe("keypress", true, self.name, function(key)
-        if key == "up" then
-            thumbnailSize.width = thumbnailSize.width + 10
-            return true
-        elseif key == "down" then
-            thumbnailSize.width = thumbnailSize.width - 10
-            return true
+    local moduleNames = love.filesystem.getDirectoryItems("scenes")
+    for _, name in pairs(moduleNames) do
+        if name ~= self.name then
+            if love.filesystem.isDirectory("scenes/" .. name) then
+                local sceneModule = { name = name }
+                local thumbnail = "scenes/" .. name .. "/asset/thumbnail.png"
+                if not love.filesystem.isFile(thumbnail) then
+                    thumbnail = "asset/thumbnail.png"
+                end
+                sceneModule.preview = love.graphics.newImage(thumbnail)
+                self.modules:push(sceneModule)
+            end
         end
-
-        return false
-    end)
+    end
 
     self:subscribe("click", true, self.name, function(...)
         return self:click(...)
@@ -65,7 +50,7 @@ function Grid:init()
     end)
 end
 
-function Grid:draw()
+function Grid:draw(dt, boundingbox)
     local size = {
         width = boundingbox.right - boundingbox.left,
         height = boundingbox.bottom - boundingbox.top
@@ -143,19 +128,21 @@ function Grid:draw()
     return true
 end
 
-function Grid:click(x, y)
-    if x >= start.x and x <= (start.x + (thumbnailSize.width + margin) * 3)
+function Grid:click(dt, x, y)
+    if x >= start.x and x <= (start.x + (thumbnailSize.width + margin) * self.modules:length())
         and y >= start.y and y <= (start.y + thumbnailSize.height)
     then
         -- selected template item.
         local index = (math.modf((x - start.x) / (thumbnailSize.width + margin)) + 1)
-        --if index < 1 or #modules < index then
-        --    error("Invalid index: " .. index)
-        --end
-        self.console:add("Selected module: " .. index)
+        local selected = self.modules:at(index)
+        self.console:add("Selected module: " .. index .. " is " .. selected.name)
+
+        self.engine:queue("start", selected.name)
 
         return true
     end
+
+    self.console:add("Missclicked: (" .. x .. ", " .. y .. ")")
 
     return false
 end

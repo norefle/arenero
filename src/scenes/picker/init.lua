@@ -11,10 +11,6 @@ local background = { r = 0, g = 0, b = 0, a = 200 }
 local border = { r = 204, g = 211, b = 222, a = 255 }
 local tileWidth = 64
 local margin = 5
-local boundingbox = {
-    left = 0, right = love.graphics.getWidth(),
-    top = 0, bottom = love.graphics.getHeight()
-}
 
 local Module = {}
 
@@ -49,8 +45,8 @@ local function getBorderCoordinate(x, y, width, height)
 end
 
 function Module:init()
-    self:subscribe("draw", false, self.name, function(dt)
-        self:draw(dt, boundingbox)
+    self:subscribe("draw", false, self.name, function(...)
+        self:draw(...)
     end)
     self:subscribe("keypress", true, self.name, function(dt, key)
         if key == "up" then

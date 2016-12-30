@@ -33,17 +33,12 @@ Config.backgroundColor = Color.new(0, 0, 0, 128)
 Config.textColor = Color.new(204, 211, 222, 255)
 Config.textMargin = 5
 
-local boundingbox = {
-    left = 0, right = love.graphics.getWidth(),
-    top = 0, bottom = love.graphics.getHeight()
-}
-
 -- Module itself.
 local Module = {}
 
 function Module:init()
-    self:subscribe("draw", false, self.name, function(dt)
-        self:draw(boundingbox)
+    self:subscribe("draw", false, self.name, function(...)
+        self:draw(...)
     end)
 
     self:subscribe("keypress", true, self.name, function(dt, key)
@@ -61,7 +56,7 @@ function Module:start()
     self.console:add("Hello world!")
 end
 
-function Module:draw(boundingbox)
+function Module:draw(dt, boundingbox)
     -- Get size of the boundaries.
     local size = {
         width = boundingbox.right - boundingbox.left,
