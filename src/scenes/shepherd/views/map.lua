@@ -29,6 +29,10 @@ end
 function Map:draw(boundingbox)
     local screenWidth = boundingbox.right - boundingbox.left
     local screenHeight = boundingbox.bottom - boundingbox.top
+
+    Config.viewport.columns = math.modf(screenWidth / Config.size, 1)
+    Config.viewport.rows = math.modf(screenHeight / Config.size, 1)
+
     local viewportWidth = Config.viewport.columns * Config.size
     local viewportHeight = Config.viewport.rows * Config.size
     local screenOffset = {
@@ -38,12 +42,12 @@ function Map:draw(boundingbox)
 
     local firstRow = math.modf(self.model.current / self.model.rows, 1) + 1
     local firstColumn = math.modf((self.model.current - 1) % self.model.rows, 1) + 1
-    local rowsInViewport = math.min(self.model.rows - firstRow, Config.viewport.rows)
+    local rowsInViewport = math.min(self.model.rows - (firstRow - 1), Config.viewport.rows) - 1
     for i = firstRow, firstRow + rowsInViewport, 1 do
         -- width - current - 1, where -1 is because current starts from 1
-        local width = math.min(self.model.columns - firstColumn, Config.viewport.columns)
+        local width = math.min(self.model.columns - (firstColumn - 1), Config.viewport.columns)
         local offset = (i - 1) * self.model.columns + (firstColumn - 1)
-        local row = self.model.tiles:range(offset + 1, offset + 1 + width)
+        local row = self.model.tiles:range(offset + 1, offset + width)
         row:foreach(function(tile, index)
             local x = screenOffset.x + (index - 1) * Config.size
             local y = screenOffset.y + (i - firstRow) * Config.size
