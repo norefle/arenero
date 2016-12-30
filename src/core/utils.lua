@@ -1,6 +1,10 @@
 local Utils = { }
 
 function Utils.clap(value, min, max)
+    if max < min then
+        min, max = max, min
+    end
+
     if value < min then
         value = min
     elseif max < value then
