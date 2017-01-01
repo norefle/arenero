@@ -14,32 +14,9 @@ function Shepherd:init()
         if key == "escape" then
             self.engine:queue("start", "grid")
             return true
-        elseif key == "left"
-            or key == "right"
-            or key == "up"
-            or key == "down"
-        then
-            local map = self.models["map"]
-            local position = map.current
-            local size = map.columns * map.rows
-            if key == "left" then
-                position = Utils.clap(position, 1, position - 1)
-            elseif key == "right" then
-                position = Utils.clap(position, position + 1, size)
-            elseif key == "up" then
-                position = Utils.clap(position, 1, position - map.columns)
-            elseif key == "down" then
-                position = Utils.clap(position, position + map.columns, size)
-            end
-
-            map.current = position
-
-            self.console:add("Position: " .. position)
-
-            return true
+        else
+            return self:keypress(dt, key)
         end
-
-        return false
     end)
 
     self:subscribe("draw", false, self.name, function(...)
@@ -51,6 +28,37 @@ function Shepherd:draw(dt, boundingbox)
     self.views:foreach(function(view)
         view:draw(boundingbox)
     end)
+end
+
+function Shepherd:keypress(dt, key)
+    local map = self.models["map"]
+    local position = map.current
+
+    -- @todo Use key manager
+    local processed = key == "left" or key == "right" or key == "up" or key == "down"
+    local currentColumn = position % map.rows
+    if currentColumn == 0 then
+        currentColumn = map.columns
+    end
+    if key == "left" then
+        if 1 < currentColumn then
+            position = position - 1
+        end
+    elseif key == "right" then
+        if currentColumn < map.columns then
+            position = position + 1
+        end
+    elseif key == "up" then
+        position = Utils.clap(position, currentColumn, position - map.columns)
+    elseif key == "down" then
+        position = Utils.clap(position, position + map.columns, map.columns * (map.rows - 1) + currentColumn)
+    end
+
+    self.console:add("Position %d -> %d column %d -> %d", map.current, position, currentColumn, position % map.rows)
+
+    map.current = position
+
+    return processed
 end
 
 return {

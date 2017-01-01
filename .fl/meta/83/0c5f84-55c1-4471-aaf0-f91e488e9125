@@ -1,0 +1,5 @@
+return {
+    id = "830c5f84-55c1-4471-aaf0-f91e488e9125",
+    name = "Core: create and use keymanager.",
+    created = 1483276426
+}

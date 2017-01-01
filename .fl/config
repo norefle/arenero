@@ -4,7 +4,7 @@ return {
 project = "Arenero",
 
 -- Default editor to open after task creation.
-editor = "subl3",
+editor = "subl",
 
 -- Boards in .fl/boards in following format:
 --   name - is the name of a board
