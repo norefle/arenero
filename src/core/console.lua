@@ -9,8 +9,8 @@ function Console:clear()
     self.data = Queue.create()
 end
 
-function Console:add(string)
-    self.data:push(string)
+function Console:add(pattern, ...)
+    self.data:push(string.format(pattern, ...))
 end
 
 --- @todo Extract to ConsoleView, keep model separately.
