@@ -5,6 +5,7 @@
 local Queue = require "core.queue"
 local Utils = require "core.utils"
 local MapModel = require "scenes.shepherd.states.map"
+local ActorModel = require "scenes.shepherd.states.actor"
 local MapView = require "scenes.shepherd.views.map"
 
 local Shepherd = {}
@@ -35,7 +36,11 @@ function Shepherd:keypress(dt, key)
     local position = map.current
 
     -- @todo Use key manager
-    local processed = key == "left" or key == "right" or key == "up" or key == "down"
+    local supported = Queue.create{ "left", "right", "up", "down", "w", "s", "a", "d" }
+    local processed = supported
+                        :filter(function(expected) return expected == key end)
+                        :length() > 0
+
     local currentColumn = position % map.rows
     if currentColumn == 0 then
         currentColumn = map.columns
@@ -52,6 +57,14 @@ function Shepherd:keypress(dt, key)
         position = Utils.clap(position, currentColumn, position - map.columns)
     elseif key == "down" then
         position = Utils.clap(position, position + map.columns, map.columns * (map.rows - 1) + currentColumn)
+    elseif key == "w" then
+        self.player.position = self.player.position - map.columns
+    elseif key == "s" then
+        self.player.position = self.player.position + map.columns
+    elseif key == "a" then
+        self.player.position = self.player.position - 1
+    elseif key == "d" then
+        self.player.position = self.player.position + 1
     end
 
     self.console:add("Position %d -> %d column %d -> %d", map.current, position, currentColumn, position % map.rows)
@@ -69,9 +82,17 @@ create = function()
         views = Queue.create()
     }
 
+
+    object.player = ActorModel.create("player", 22)
+    object.actors = Queue.create{
+        object.player,
+        ActorModel.create("wolf", 151),
+        ActorModel.create("wolf", 89)
+    }
+
     local map = MapModel.create(20, 20)
     object.models["map"] = map
-    object.views:push(MapView.create(map))
+    object.views:push(MapView.create(map, object.actors))
 
     return setmetatable(object, { __index = Shepherd })
 end

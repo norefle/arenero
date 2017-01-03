@@ -5,9 +5,17 @@
 
 local Queue = {}
 
-local function create()
+local function create(data)
     local object = { data = { } }
-    return setmetatable(object, { __index = Queue })
+    local result = setmetatable(object, { __index = Queue })
+
+    if data then
+        for _, value in pairs(data) do
+            result:push(value)
+        end
+    end
+
+    return result
 end
 
 function Queue:push(object)
@@ -75,4 +83,9 @@ function Queue:range(from, to)
     return Range.create(self, from, to)
 end
 
-return { create = create }
+return {
+
+--- @param data (Optional) List/array of the data to initialize a new queue with.
+create = create
+
+}

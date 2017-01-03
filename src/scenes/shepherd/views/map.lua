@@ -8,6 +8,7 @@ local Config = {
 
 tiles = { "blank" },
 size = 64,
+halfSize = 32,
 viewport = { columns = 10, rows = 7 },
 
 }
@@ -24,6 +25,16 @@ local function drawTile(x, y, type)
     }
     love.graphics.setColor(tiles[type]:unpack())
     love.graphics.rectangle("fill", x, y, Config.size, Config.size)
+end
+
+--- @todo Replace with proper actor assets.
+local function drawActor(x, y, type)
+    local assets = {
+        ["player"] = Utils.color(255, 0, 0),
+        ["wolf"] = Utils.color(128, 128, 128)
+    }
+    love.graphics.setColor(assets[type]:unpack())
+    love.graphics.circle("fill", x + Config.halfSize, y + Config.halfSize, Config.halfSize / 2)
 end
 
 function Map:draw(boundingbox)
@@ -57,14 +68,30 @@ function Map:draw(boundingbox)
             love.graphics.printf(offset + index, x, y + 15, Config.size, "center")
         end)
     end
+
+    self.actors:foreach(function(actor)
+        local column = math.modf((actor.position - 1) % self.model.rows, 2) + 1
+        local row = math.modf(actor.position / self.model.rows, 1) + 1
+        if firstRow <= row
+            and row <= (firstRow + Config.viewport.rows)
+            and firstColumn <= column
+            and column <= (firstColumn + Config.viewport.columns)
+        then
+            local x = screenOffset.x + ((column - firstColumn) * Config.size)
+            local y = screenOffset.y +  ((row - firstRow) * Config.size)
+            drawActor(x, y, actor.name)
+        end
+    end)
 end
 
 return {
 
-create = function(model)
-    local object = { }
-    object.model = model
-    object.viewport = { from = 1, to = Config.viewport.columns * Config.viewport.rows }
+create = function(model, actors)
+    local object = {
+        model = model,
+        actors = actors,
+        viewport = { from = 1, to = Config.viewport.columns * Config.viewport.rows },
+    }
 
     return setmetatable(object, { __index = Map })
 end
