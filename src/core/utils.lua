@@ -13,6 +13,22 @@ function Utils.clap(value, min, max)
     return value
 end
 
+function Utils.clone(base)
+    local object = { }
+    for key, value in pairs(base) do
+        object[key] = value
+    end
+
+    local base_mt = getmetatable(base)
+    if base_mt then
+        for key, value in pairs(base_mt.__index) do
+            object[key] = value
+        end
+    end
+
+    return object
+end
+
 local Color = {}
 
 function Utils.color(r, g, b, a)

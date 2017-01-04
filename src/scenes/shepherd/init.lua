@@ -11,6 +11,21 @@ local MapView = require "scenes.shepherd.views.map"
 local Shepherd = {}
 
 function Shepherd:init()
+    self.player = self.engine:actor(ActorModel.create(22), "player", 10, function() end)
+    for k, v in pairs(self.player) do
+        print(k, v)
+    end
+
+    self.actors = Queue.create{
+        self.player,
+        self.engine:actor(ActorModel.create(151), "wolf", 2),
+        self.engine:actor(ActorModel.create(89), "wolf", 0.5)
+    }
+
+    local map = MapModel.create(20, 20)
+    self.models["map"] = map
+    self.views:push(MapView.create(map, self.actors))
+
     self:subscribe("keypress", true, self.name, function(dt, key)
         if key == "escape" then
             self.engine:queue("start", "grid")
@@ -81,18 +96,6 @@ create = function()
         models = { },
         views = Queue.create()
     }
-
-
-    object.player = ActorModel.create("player", 22)
-    object.actors = Queue.create{
-        object.player,
-        ActorModel.create("wolf", 151),
-        ActorModel.create("wolf", 89)
-    }
-
-    local map = MapModel.create(20, 20)
-    object.models["map"] = map
-    object.views:push(MapView.create(map, object.actors))
 
     return setmetatable(object, { __index = Shepherd })
 end

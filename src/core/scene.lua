@@ -4,6 +4,7 @@
 ----------------------------------------------------------------------------]]--
 
 local Queue = require "core.queue"
+local Utils = require "core.utils"
 local Scene = { name = "scene" }
 
 function Scene:supports(event)
@@ -29,26 +30,10 @@ function Scene:unsubscribe(event, name)
     end)
 end
 
-local function clone(base)
-    local object = { }
-    for key, value in pairs(base) do
-        object[key] = value
-    end
-
-    local base_mt = getmetatable(base)
-    if base_mt then
-        for key, value in pairs(base_mt.__index) do
-            object[key] = value
-        end
-    end
-
-    return object
-end
-
 return {
 
 create = function(engine, name, sceneObject, output)
-    local object = clone(sceneObject)
+    local object = Utils.clone(sceneObject)
     object.engine = engine
     object.name = name
     object.lg = love.graphics

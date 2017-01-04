@@ -4,6 +4,7 @@
 local Scene = require "core.scene"
 local Queue = require "core.queue"
 local Console = require "core.console"
+local ActorManager = require "core.actormanager"
 local SceneManager = require "core.scenemanager"
 
 local Core = {}
@@ -11,6 +12,10 @@ local Core = {}
 function Core:init()
     self.scenemanager = SceneManager.create(self)
     self.scenemanager:init()
+
+    self.actormanager = ActorManager.create(self)
+    self.actormanager:init()
+
     self.console = Console.create(600, 200)
     self:subscribe("draw", false, "console", function(...)
         self.console:draw(...)
@@ -50,6 +55,10 @@ function Core:stop()
         self.scenes[self.active.name] = nil
         self.active = nil
     end
+end
+
+function Core:actor(base, name, timeout, callback)
+    return self.actormanager:actor(base, name, timeout, callback)
 end
 
 function Core:emit(event, dt, ...)
@@ -104,6 +113,8 @@ function Core:pump(dt)
     if not self.events then
         error("There are no events to pump trough.", 2)
     end
+
+    self.actormanager:update(dt)
 
     local events = self.events
     self.events = Queue.create()
