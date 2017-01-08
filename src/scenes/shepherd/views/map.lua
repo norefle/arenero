@@ -2,7 +2,7 @@
 - @file views/map.lua
 ----------------------------------------------------------------------------]]--
 
-local Utils = require "core.utils"
+local Color = require "core.utils.color"
 
 local Config = {
 
@@ -18,10 +18,10 @@ local Map = { }
 --- @todo Replace with proper tile assets
 local function drawTile(x, y, type)
     local tiles = {
-        Utils.color(250, 250, 250, 128), -- 1
-        Utils.color(250, 64, 64, 128),   -- 2
-        Utils.color(64, 250, 64, 128),   -- 3
-        Utils.color(64, 64, 250, 128),   -- 4
+        Color(250, 250, 250, 128), -- 1
+        Color(250, 64, 64, 128),   -- 2
+        Color(64, 250, 64, 128),   -- 3
+        Color(64, 64, 250, 128),   -- 4
     }
     love.graphics.setColor(tiles[type]:unpack())
     love.graphics.rectangle("fill", x, y, Config.size, Config.size)
@@ -30,8 +30,8 @@ end
 --- @todo Replace with proper actor assets.
 local function drawActor(x, y, type)
     local assets = {
-        ["player"] = Utils.color(255, 0, 0),
-        ["wolf"] = Utils.color(128, 128, 128)
+        ["player"] = Color(255, 0, 0),
+        ["wolf"] = Color(128, 128, 128)
     }
     love.graphics.setColor(assets[type]:unpack())
     love.graphics.circle("fill", x + Config.halfSize, y + Config.halfSize, Config.halfSize / 2)

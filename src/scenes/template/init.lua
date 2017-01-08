@@ -2,7 +2,7 @@
 - @brief template scene.
 ----------------------------------------------------------------------------]]--
 
-local Utils = require "core.utils"
+local Color = require "core.utils.color"
 
 local Config = {}
 
@@ -12,8 +12,8 @@ Config.description = "Hello world for Arenero."
 Config.version = "0.1.0"
 
 -- Local configurations.
-Config.backgroundColor = Utils.color(0, 0, 0, 128)
-Config.textColor = Utils.color(204, 211, 222, 255)
+Config.backgroundColor = Color(0, 0, 0, 128)
+Config.textColor = Color(204, 211, 222, 255)
 Config.textMargin = 5
 
 -- Module itself.
