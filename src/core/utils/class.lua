@@ -1,6 +1,8 @@
 --[[----------------------------------------------------------------------------
 ----------------------------------------------------------------------------]]--
 
+local Export = require "core.utils.export"
+
 local Class = {
     __type = "class"
 }
@@ -15,25 +17,16 @@ function Class:create(name, super)
 end
 
 function Class:__index(key)
-    return ("table" == type(self.__super))
-        and self.__super[key]
-        or Class[key]
+    local super = rawget(self, "__super")
+    return ("table" == type(super))
+        and super[key]
+        or rawget(Class, key)
 end
 
 function Class:__tostring()
     return self.__type
 end
 
-local _M = {
-    create = function(...)
-        return Class:create(...)
-    end
+return Export {
+    create = function(...) return Class:create(...) end
 }
-
-local _M_mt = {
-    __call = function(self, ...)
-        return Class:create(...)
-    end
-}
-
-return setmetatable(_M, _M_mt)
