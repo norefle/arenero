@@ -12,10 +12,6 @@ local Shepherd = {}
 
 function Shepherd:init()
     self.player = self.engine:actor(ActorModel.create(22), "player", 10, function() end)
-    for k, v in pairs(self.player) do
-        print(k, v)
-    end
-
     self.actors = Queue.create{
         self.player,
         self.engine:actor(ActorModel.create(151), "wolf", 2),
@@ -25,7 +21,9 @@ function Shepherd:init()
     local map = MapModel.create(20, 20)
     self.models["map"] = map
     self.views:push(MapView.create(map, self.actors))
+end
 
+function Shepherd:start()
     self:subscribe("keypress", true, self.name, function(dt, key)
         if key == "escape" then
             self.engine:queue("start", "grid")

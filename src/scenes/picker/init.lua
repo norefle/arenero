@@ -44,7 +44,7 @@ local function getBorderCoordinate(x, y, width, height)
         rect.left, center.y
 end
 
-function Module:init()
+function Module:start()
     self:subscribe("draw", false, self.name, function(...)
         self:draw(...)
     end)

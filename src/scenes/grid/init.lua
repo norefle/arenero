@@ -15,7 +15,7 @@ local text = 15
 local start = { x = 100, y = 100 }
 local thumbnailSize = { width = 128, height = 128 + margin + text }
 
-local Grid = { }
+local Grid = { name = "grid" }
 
 function create()
     local object = {
@@ -40,7 +40,9 @@ function Grid:init()
             end
         end
     end
+end
 
+function Grid:start()
     self:subscribe("click", true, self.name, function(...)
         return self:click(...)
     end)

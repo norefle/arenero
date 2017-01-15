@@ -18,7 +18,7 @@ Tileset.tiles = {}
 Tileset.width = 0
 Tileset.height = 0
 
-local Map = {}
+local Map = { }
 
 function Map.new(x, y, level, width, height)
     local object = {}
@@ -83,7 +83,7 @@ local Module = {}
 
 function Module:init()
     local err, level = pcall(require, "scenes.map.asset.level.level_1")
-    Tileset.set = self.lg.newImage("scenes/map/asset/" .. level.tileset.image)
+    Tileset.set = lg.newImage("scenes/map/asset/" .. level.tileset.image)
     Tileset.width = level.tileset.tilewidth
     Tileset.height = level.tileset.tileheight
     for i = 1, level.tileset.tilecount do
@@ -97,7 +97,9 @@ function Module:init()
 
     -- checks
     self.map = Map.new(0, 0, level, lg.getWidth(), lg.getHeight())
+end
 
+function Module:start()
     self:subscribe("draw", false, self.name, function(...)
         self:draw(...)
     end)

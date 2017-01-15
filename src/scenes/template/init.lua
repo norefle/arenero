@@ -19,7 +19,7 @@ Config.textMargin = 5
 -- Module itself.
 local Module = {}
 
-function Module:init()
+function Module:start()
     self:subscribe("draw", false, self.name, function(...)
         self:draw(...)
     end)
@@ -33,9 +33,6 @@ function Module:init()
         return false
     end)
 
-end
-
-function Module:start()
     self.console:add("Hello world!")
 end
 

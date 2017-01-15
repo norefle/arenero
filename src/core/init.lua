@@ -29,8 +29,7 @@ function Core:scene(name)
         if not loaded then
             error("Invalid scene name: " .. tostring(name) .. " " .. sceneObject, 2)
         end
-        selected = Scene.create(self, name, sceneObject.create(), self.console)
-        selected:init()
+        selected = Scene(self, name, sceneObject.create(), self.console)
         self.scenes[name] = selected
     end
 
@@ -51,6 +50,9 @@ end
 
 function Core:stop()
     if self.active then
+        if self.active.stop then
+            self.active:stop()
+        end
         self:unsubscribe(self.active.name)
         self.scenes[self.active.name] = nil
         self.active = nil
