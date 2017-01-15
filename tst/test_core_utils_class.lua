@@ -69,4 +69,24 @@ describe("Core class", function()
         assert.is.falsy(Instance.__type)
         assert.is.falsy(getmetatable(Instance))
     end)
+
+    it("should call 'init' method of instance object if it exists", function()
+        local called = 0
+        local Instance = { init = function() called = called + 1 end }
+
+        local object = Class("init", nil, Instance)
+
+        assert.are.equal(1, called)
+    end)
+
+    it("should not call 'init' if it's not function", function()
+        local called = 0
+        local _mt = { __call = function() called = called + 1 end }
+        local Instance = { init = { } }
+        setmetatable(Instance.init, _mt)
+
+        local object = Class("callable_mt", nil, Instance)
+
+        assert.are.equal(0, called)
+    end)
 end)

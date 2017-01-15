@@ -28,7 +28,13 @@ function Class:create(name, super, instance)
     object.__type = name or "unknown"
     object.__super = super
 
-    return setmetatable(object, self)
+    setmetatable(object, self)
+
+    if type(object.init) == "function" then
+        object:init()
+    end
+
+    return object
 end
 
 function Class:__index(key)
