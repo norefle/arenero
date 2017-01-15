@@ -7,11 +7,26 @@ local Class = {
     __type = "class"
 }
 
-function Class:create(name, super)
-    local object = {
-        __type = name or "unknown",
-        __super = super
-    }
+local function clone(base)
+    local object = { }
+    for key, value in pairs(base) do
+        object[key] = value
+    end
+
+    local base_mt = getmetatable(base)
+    if base_mt then
+        for key, value in pairs(base_mt.__index) do
+            object[key] = value
+        end
+    end
+
+    return object
+end
+
+function Class:create(name, super, instance)
+    local object = instance and clone(instance) or {}
+    object.__type = name or "unknown"
+    object.__super = super
 
     return setmetatable(object, self)
 end

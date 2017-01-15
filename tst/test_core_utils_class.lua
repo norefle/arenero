@@ -50,4 +50,23 @@ describe("Core class", function()
         assert.are.equal("leaf", leaf.__type)
         assert.are.equal("leaf#from middle#node#from middle#root#from root", leaf:is())
     end)
+
+    it("should use instance object instead of creating one", function()
+        local Instance = {
+            name = "instance",
+            is = function(self) return self.name end
+        }
+
+        local object = Class("Instance", nil, Instance)
+
+        assert.are.equal(Instance.name, object:is())
+    end)
+
+    it("should copy instance object instead of using it", function()
+        local Instance = { name = "instance" }
+        local object = Class("instance", nil, Instance)
+
+        assert.is.falsy(Instance.__type)
+        assert.is.falsy(getmetatable(Instance))
+    end)
 end)
