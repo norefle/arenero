@@ -10,7 +10,8 @@ local MapView = require "scenes.shepherd.views.map"
 
 local Shepherd = {}
 
-function Shepherd:init()
+function Shepherd:init(args)
+    self.__super:init(args)
     self.player = self.engine:actor(ActorModel.create(22), "player", 10, function() end)
     self.actors = Queue.create{
         self.player,

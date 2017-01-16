@@ -25,7 +25,8 @@ function create()
     return setmetatable(object, { __index = Grid })
 end
 
-function Grid:init()
+function Grid:init(args)
+    self.__super:init(args)
     local moduleNames = love.filesystem.getDirectoryItems("scenes")
     for _, name in pairs(moduleNames) do
         if name ~= self.name then

@@ -9,6 +9,13 @@ local EventSystem = require "core.eventsystem"
 
 local Scene = EventSystem("Scene")
 
+function Scene:init(args)
+    self.engine = args.engine
+    self.name = args.name
+    self.lg = args.lg
+    self.console = args.console
+end
+
 function Scene:start()
     self:subscribe("draw", false, self.name, function(...)
         self:draw(...)
@@ -25,12 +32,17 @@ end
 return Export {
 
 create = function(engine, name, sceneObject, output)
-    Scene.engine = Scene.engine or engine
-    local object = Class(name, Scene, sceneObject)
-    object.engine = engine
-    object.name = name
-    object.lg = love.graphics
-    object.console = output
+    local object = Class {
+        name = name,
+        extends = Scene,
+        instance = sceneObject,
+        args = {
+            engine = engine,
+            name = name,
+            lg = love.graphics,
+            console = output
+        }
+    }
 
     return object
 end

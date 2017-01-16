@@ -81,7 +81,8 @@ end
 
 local Module = {}
 
-function Module:init()
+function Module:init(args)
+    self.__super:init(args)
     local err, level = pcall(require, "scenes.map.asset.level.level_1")
     Tileset.set = lg.newImage("scenes/map/asset/" .. level.tileset.image)
     Tileset.width = level.tileset.tilewidth

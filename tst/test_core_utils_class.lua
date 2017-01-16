@@ -17,7 +17,7 @@ describe("Core class", function()
     end)
 
     it("should use name as type", function()
-        local actual = Class "test"
+        local actual = Class("test")
         assert.are.equal("test", actual.__type)
     end)
 
@@ -26,7 +26,7 @@ describe("Core class", function()
         Parent.name = "Parent"
         Parent.is = function(self) return self.name end
 
-        local subclass = Class("Child", Parent)
+        local subclass = Class { name = "Child", extends = Parent }
 
         assert.are.equal("function", type(subclass.is))
         assert.are.equal(Parent.name, subclass:is())
@@ -34,7 +34,7 @@ describe("Core class", function()
 
     it("should return nil for non existed fields in both class and its parent", function()
         local parent = { }
-        local child = Class("child", parent)
+        local child = Class { name = "child", extends = parent }
 
         assert.is.falsy(child.nonExisted)
     end)
@@ -42,10 +42,10 @@ describe("Core class", function()
     it("should support inheritance depth more that 2", function()
         local Root = Class("root")
         Root.is = function(self) return self.__type .. "#from root" end
-        local Middle = Class("node", Root)
+        local Middle = Class{ name = "node", extends = Root }
         Middle.is = function(self) return self.__type .. "#from middle#" .. self.__super:is() end
 
-        local leaf = Class("leaf", Middle)
+        local leaf = Class { name = "leaf", extends = Middle }
 
         assert.are.equal("leaf", leaf.__type)
         assert.are.equal("leaf#from middle#node#from middle#root#from root", leaf:is())
@@ -57,14 +57,14 @@ describe("Core class", function()
             is = function(self) return self.name end
         }
 
-        local object = Class("Instance", nil, Instance)
+        local object = Class { name = "Instance", instance = Instance }
 
         assert.are.equal(Instance.name, object:is())
     end)
 
     it("should copy instance object instead of using it", function()
         local Instance = { name = "instance" }
-        local object = Class("instance", nil, Instance)
+        local object = Class { name = "instance", instance = Instance }
 
         assert.is.falsy(Instance.__type)
         assert.is.falsy(getmetatable(Instance))
@@ -74,7 +74,7 @@ describe("Core class", function()
         local called = 0
         local Instance = { init = function() called = called + 1 end }
 
-        local object = Class("init", nil, Instance)
+        local object = Class { name = "init", instance = Instance }
 
         assert.are.equal(1, called)
     end)
@@ -85,7 +85,7 @@ describe("Core class", function()
         local Instance = { init = { } }
         setmetatable(Instance.init, _mt)
 
-        local object = Class("callable_mt", nil, Instance)
+        local object = Class { name = "callable_mt", insatnce = Instance }
 
         assert.are.equal(0, called)
     end)

@@ -7,8 +7,10 @@ local Queue = require "core.queue"
 
 local System = Class("EventSystem")
 
-function System:init(engine)
+function System:init(args)
+    self.engine = args.engine
     self.subscribers = { }
+    self.event = Queue.create()
 end
 
 function System:supports(event)
@@ -42,9 +44,34 @@ function System:unsubscribe(event, name)
     end
 end
 
+function System:queue(event, ...)
+    if not self.events then
+        error("There is no queue to add an event to: " .. event, 2)
+    end
+
+    self.events:push({ name = event, args = { ... }})
+end
+
+function System:pump(dt)
+    if not self.events then
+        error("There are no events to pump trough.", 2)
+    end
+
+    local events = self.events
+    self.events = Queue.create()
+
+    events:foreach(function(event)
+        self:emit(event.name, dt, unpack(event.args))
+    end)
+end
 
 return Export {
-    create = function(name, object)
-        return Class(name, System, object)
+    create = function(engine, name, object)
+        return Class {
+            name = name,
+            extends = System,
+            instance = object,
+            args = { engine = engine }
+        }
     end
 }

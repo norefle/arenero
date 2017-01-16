@@ -23,15 +23,24 @@ local function clone(base)
     return object
 end
 
-function Class:create(name, super, instance)
-    local object = instance and clone(instance) or {}
-    object.__type = name or "unknown"
-    object.__super = super
+function Class:create(argument)
+    local object
+    if not argument or type(argument) == "string" then
+        object = { }
+        object.__type = argument or "unknown"
+    elseif type(argument) == "table" then
+        object = argument.instance and clone(argument.instance) or {}
+        object.__type = argument.name or "unknown"
+        object.__super = argument.extends
+    else
+        error("Can't create class parametrized with a type " .. type(argument), 2)
+    end
 
     setmetatable(object, self)
 
     if type(object.init) == "function" then
-        object:init()
+        local args = type(argument) == "table" and argument.args or nil
+        object:init(args)
     end
 
     return object
