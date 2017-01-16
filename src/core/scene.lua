@@ -6,8 +6,9 @@
 local Class = require "core.utils.class"
 local Export = require "core.utils.export"
 local EventSystem = require "core.eventsystem"
+local Queue = require "core.queue"
 
-local Scene = EventSystem("Scene")
+local Scene = EventSystem({}, "Scene", nil, Queue.create{ "draw", "keypress", "click"})
 
 function Scene:init(args)
     self.engine = args.engine

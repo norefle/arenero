@@ -2,6 +2,7 @@
 ----------------------------------------------------------------------------]]--
 
 local Class = require "core.utils.class"
+local Component = require "core.component"
 local Export = require "core.utils.export"
 local Queue = require "core.queue"
 
@@ -9,8 +10,14 @@ local System = Class("EventSystem")
 
 function System:init(args)
     self.engine = args.engine
+
     self.subscribers = { }
-    self.event = Queue.create()
+    self.supported = args.supported
+    self.supported:foreach(function(event)
+        self.subscribers[event] = Queue.create()
+    end)
+
+    self.events = Queue.create()
 end
 
 function System:supports(event)
@@ -19,7 +26,7 @@ end
 
 function System:subscribe(event, terminal, name, callback)
     if not self.subscribers[event] then
-        self.subscribers[event] = Queue.create()
+        error("Unsupported event type " .. event .. " for the system " .. self.name, 2)
     end
 
     local listener = { name = name, terminal = terminal, fn = callback }
@@ -65,13 +72,32 @@ function System:pump(dt)
     end)
 end
 
+function System:component(name, terminal, instance)
+    local object = Component(self.engine, name, instance)
+    self.supported:foreach(function(event)
+        if type(object[event]) == "function" then
+            self:subscribe(event, terminal, object.name, function(...)
+                return object[event](object, ...)
+            end)
+        end
+    end)
+
+    return object
+end
+
 return Export {
-    create = function(engine, name, object)
+    create = function(engine, name, object, supported)
+        assert(type(engine) == "table", "Can't create an event system with empty engine.", 2)
+        assert(type(name) == "string", "Can't create a nameless event system.", 2)
+        assert(type(supported) == "table", "Can't create an event system without supported events.", 2)
         return Class {
             name = name,
             extends = System,
             instance = object,
-            args = { engine = engine }
+            args = {
+                engine = engine,
+                supported = supported
+            }
         }
     end
 }

@@ -7,6 +7,7 @@ local Utils = require "core.utils"
 local MapModel = require "scenes.shepherd.states.map"
 local ActorModel = require "scenes.shepherd.states.actor"
 local MapView = require "scenes.shepherd.views.map"
+local Escapabale = require "scenes.shepherd.components.escapable"
 
 local Shepherd = {}
 
@@ -22,20 +23,26 @@ function Shepherd:init(args)
     local map = MapModel.create(20, 20)
     self.models["map"] = map
     self.views:push(MapView.create(map, self.actors))
+
+    self.components = Queue.create {
+        self:component("exit", true, Escapabale.create())
+    }
 end
 
 function Shepherd:start()
     self:subscribe("keypress", true, self.name, function(dt, key)
-        if key == "escape" then
-            self.engine:queue("start", "grid")
-            return true
-        else
-            return self:keypress(dt, key)
-        end
+        return self:keypress(dt, key)
     end)
 
     self:subscribe("draw", false, self.name, function(...)
         self:draw(...)
+    end)
+end
+
+function Shepherd:stop()
+    self.__super:stop()
+    self.components:foreach(function(component)
+        self:unsubscribe(component.name)
     end)
 end
 
