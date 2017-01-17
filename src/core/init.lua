@@ -1,25 +1,32 @@
 --[[----------------------------------------------------------------------------
 ----------------------------------------------------------------------------]]--
 
+local Class = require "core.utils.class"
 local Scene = require "core.scene"
 local Queue = require "core.queue"
 local Console = require "core.console"
 local ActorManager = require "core.actormanager"
 local SceneManager = require "core.scenemanager"
+local EventSystem = require "core.eventsystem"
+local Export = require "core.utils.export"
 
-local Core = {}
+local Core = Class("Engine")
 
 function Core:init()
+    self.scenes = {}
+    self.subscribers = {}
+    self.events = Queue.create()
+    self.graphics = love.graphics
+
+    self.renderingSystem = EventSystem(self, "Render", nil, Queue.create{ "draw" })
+
     self.scenemanager = SceneManager.create(self)
     self.scenemanager:init()
 
     self.actormanager = ActorManager.create(self)
     self.actormanager:init()
 
-    self.console = Console.create(600, 200)
-    self:subscribe("draw", false, "console", function(...)
-        self.console:draw(...)
-    end)
+    self.console = Console(self, 600, 200)
 end
 
 function Core:scene(name)
@@ -34,6 +41,14 @@ function Core:scene(name)
     end
 
     return selected
+end
+
+function Core:component(kind, name, terminal, instance)
+    if kind == "render" then
+        return self.renderingSystem:component(name, terminal, instance)
+    end
+
+    error("Unsupported kind of component " .. kind, 2)
 end
 
 function Core:start(name)
@@ -83,6 +98,10 @@ function Core:emit(event, dt, ...)
             end
         end)
     end
+
+    if "draw" == event then
+        self.renderingSystem:emit(event, dt, ...)
+    end
 end
 
 function Core:subscribe(event, terminal, name, callback)
@@ -123,20 +142,17 @@ function Core:pump(dt)
     events:foreach(function(event)
         self:emit(event.name, dt, unpack(event.args))
     end)
+
+    self.renderingSystem:pump(dt)
 end
 
-return {
+return Export {
 
-create = function(scenes)
-    scenes = scenes or {}
-    local object = {
-        scenes = scenes,
-        subscribers = {},
-        events = Queue.create(),
-        graphics = love.graphics
+create = function()
+    return Class {
+        name = "Engine",
+        extends = Core
     }
-
-    return setmetatable(object, { __index = Core } )
 end
 
 }

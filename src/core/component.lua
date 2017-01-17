@@ -17,7 +17,7 @@ return Export {
             extends = Component,
             instance = object,
             args = {
-                engine = engine,
+                engine = engine
             }
         }
     end

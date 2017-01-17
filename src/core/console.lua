@@ -2,19 +2,14 @@
 ----------------------------------------------------------------------------]]--
 
 local Queue = require "core.queue"
+local Class = require "core.utils.class"
+local Export = require "core.utils.export"
 
-local Console = {}
+local Console = Class("Console")
 
-function Console:clear()
-    self.data = Queue.create()
-end
+local Drawable = {}
 
-function Console:add(pattern, ...)
-    self.data:push(string.format(pattern, ...))
-end
-
---- @todo Extract to ConsoleView, keep model separately.
-function Console:draw(dt, boundingbox)
+function Drawable:draw(dt, boundingbox)
     local width = math.min(self.width, boundingbox.right - boundingbox.left)
     local height = math.min(self.height, boundingbox.bottom - boundingbox.top)
     local left = boundingbox.left + self.margin
@@ -40,18 +35,43 @@ function Console:draw(dt, boundingbox)
     return true
 end
 
-return {
-
-create = function(width, height)
-    local object = {
-        width = width,
-        height = height,
-        margin = 5,
-        textHeight = 15
+function Console:init(args)
+    self.engine = args.engine
+    local drawable = {
+        data = Queue.create(), -- extract model
+        width = args.width,
+        height = args.height,
+        margin = args.margin,
+        textHeight = args.textHeight
     }
-    object.data = Queue.create()
+    setmetatable(drawable, { __index = Drawable })
 
-    return setmetatable(object, { __index = Console })
+    self.render = self.engine:component("render", "Console::Drawable", false, drawable)
+    self:clear()
+end
+
+function Console:clear()
+    self.render.data = Queue.create()
+end
+
+function Console:add(pattern, ...)
+    self.render.data:push(string.format(pattern, ...))
+end
+
+return Export {
+
+create = function(engine, width, height)
+    return Class {
+        name = "Console",
+        extends = Console,
+        args = {
+            engine = engine,
+            width = width,
+            height = height,
+            margin = 5,
+            textHeight = 15
+        }
+    }
 end
 
 }

@@ -59,6 +59,22 @@ function System:queue(event, ...)
     self.events:push({ name = event, args = { ... }})
 end
 
+function System:emit(event, dt, ...)
+    if not self.subscribers[event] then
+        error("Can't emit unsupported event " .. event, 2)
+    end
+
+    local args = { dt, ... }
+    local continue = true
+    self.subscribers[event]:foreach(function(listener)
+        if continue then
+            local processed = listener.fn(
+                unpack(args))
+            continue = not (listener.terminal and processed)
+        end
+    end)
+end
+
 function System:pump(dt)
     if not self.events then
         error("There are no events to pump trough.", 2)

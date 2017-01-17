@@ -54,7 +54,7 @@ function Class:__index(key)
 end
 
 function Class:__tostring()
-    return self.__type
+    return "[Class::" .. self.__type .. "]"
 end
 
 return Export {
