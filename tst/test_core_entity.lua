@@ -18,17 +18,17 @@ describe("Entity", function()
 
     it("should add component by its name", function()
         local entity = Entity("AddsComponent")
-        entity:add("Whatever-Component", {})
+        entity:addComponent("Whatever-Component", {})
 
         assert.are.equal(1, entity.components:length())
     end)
 
     it("should fail on add if component already exists", function()
         local entity = Entity("DoubleAdd")
-        entity:add("Not-unique", { value = "a" })
+        entity:addComponent("Not-unique", { value = "a" })
 
         local add = function()
-            entity:add("Not-unique", { value = "b" })
+            entity:addComponent("Not-unique", { value = "b" })
         end
 
         assert.has_error(add, "Component already exists: Not-unique")
@@ -45,7 +45,7 @@ describe("Entity", function()
 
     it("should return component by its name", function()
         local entity = Entity("ReturnsComponent")
-        entity:add("Expected-Component", { key = "value" })
+        entity:addComponent("Expected-Component", { key = "value" })
 
         local actual = entity:component("Expected-Component")
 

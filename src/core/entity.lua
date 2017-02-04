@@ -11,7 +11,7 @@ function Entity:init()
     self.components = Queue.create()
 end
 
-function Entity:add(componentType, component)
+function Entity:addComponent(componentType, component)
     assert(nil ~= componentType, "Expects valid component type")
     assert("table" == type(component), "Expects component to be valid.", 2)
 
@@ -35,13 +35,14 @@ function Entity:component(componentType)
 end
 
 return Export {
-    create = function(name, object)
+    create = function(name, object, args)
         assert(type(name) == "string", "Can't create a nameless entity.", 2)
 
         return Class {
             name = name,
             extends = Entity,
-            instance = object
+            instance = object,
+            args = args
         }
     end
 }

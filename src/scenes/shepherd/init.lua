@@ -24,9 +24,9 @@ function Shepherd:init(args)
     self.models["map"] = map
     self.views:push(MapView.create(map, self.actors))
 
-    self.components = Queue.create {
-        self:component("exit", true, Escapabale.create())
-    }
+    local escapable = Escapabale(self.engine)
+    self.components = Queue.create { escapable }
+    self:addComponent(escapable, true)
 end
 
 function Shepherd:start()

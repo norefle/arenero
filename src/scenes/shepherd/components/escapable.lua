@@ -2,6 +2,7 @@
 ----------------------------------------------------------------------------]]--
 
 local Export = require "core.utils.export"
+local Component = require "core.component"
 
 local Escapable = {}
 
@@ -15,7 +16,7 @@ function Escapable:keypress(dt, key)
 end
 
 return Export {
-    create = function()
-        return setmetatable({}, { __index = Escapable })
+    create = function(engine, entity)
+        return Component(engine, entity, "Escapable", Escapable)
     end
 }

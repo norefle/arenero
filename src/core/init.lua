@@ -4,13 +4,14 @@
 local Class = require "core.utils.class"
 local Scene = require "core.scene"
 local Queue = require "core.queue"
-local Console = require "core.console"
+local Console = require "asset.prefabs.console"
 local ActorManager = require "core.actormanager"
 local SceneManager = require "core.scenemanager"
 local EventSystem = require "core.eventsystem"
+local Entity = require "core.entity"
 local Export = require "core.utils.export"
 
-local Core = Class("Engine")
+local Core = {}
 
 function Core:init()
     self.scenes = {}
@@ -43,12 +44,17 @@ function Core:scene(name)
     return selected
 end
 
-function Core:component(kind, name, terminal, instance)
+function Core:component(kind, component, terminal)
     if kind == "render" then
-        return self.renderingSystem:component(name, terminal, instance)
+        self.renderingSystem:addComponent(component, terminal)
+        return component
     end
 
     error("Unsupported kind of component " .. kind, 2)
+end
+
+function Core:entity(name, instance)
+    return Entity(name, instance)
 end
 
 function Core:start(name)

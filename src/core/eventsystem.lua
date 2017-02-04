@@ -88,17 +88,14 @@ function System:pump(dt)
     end)
 end
 
-function System:component(name, terminal, instance)
-    local object = Component(self.engine, name, instance)
+function System:addComponent(component, terminal)
     self.supported:foreach(function(event)
-        if type(object[event]) == "function" then
-            self:subscribe(event, terminal, object.name, function(...)
-                return object[event](object, ...)
+        if type(component[event]) == "function" then
+            self:subscribe(event, terminal, component.name, function(...)
+                return component[event](component, ...)
             end)
         end
     end)
-
-    return object
 end
 
 return Export {

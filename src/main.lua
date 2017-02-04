@@ -1,4 +1,4 @@
-local Engine = require("core").create()
+local Engine = require "core"
 local Queue = require "core.queue"
 
 local boundingbox = {
@@ -8,7 +8,7 @@ local boundingbox = {
 
 function love.load()
     love.keyboard.setKeyRepeat(true)
-    Engine:init()
+    Engine = Engine()
 
     Engine:subscribe("keypress", true, "main", function(dt, key)
         if key == "escape" then

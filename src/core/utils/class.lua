@@ -13,10 +13,20 @@ local function clone(base)
         object[key] = value
     end
 
+    if type(base.__super) == "table" then
+        for key, value in pairs(base.__super) do
+            if not object[key] then
+                object[key] = value
+            end
+        end
+    end
+
     local base_mt = getmetatable(base)
-    if base_mt then
+    if base_mt  and "table" == type(base_mt.__index) then
         for key, value in pairs(base_mt.__index) do
-            object[key] = value
+            if not object[key] then
+                object[key] = value
+            end
         end
     end
 
@@ -37,6 +47,12 @@ function Class:create(argument)
     end
 
     setmetatable(object, self)
+
+    local super = rawget(object, "__super")
+    if super and type(super.init) == "function" then
+        local args = type(argument) == "table" and argument.args or nil
+        super:init(args)
+    end
 
     if type(object.init) == "function" then
         local args = type(argument) == "table" and argument.args or nil
