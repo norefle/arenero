@@ -62,6 +62,16 @@ function Queue:filter(predicate)
     return filtered
 end
 
+function Queue:find(predicate)
+    for _, value in pairs(self.data) do
+        if predicate(value) then
+            return value
+        end
+    end
+
+    return nil
+end
+
 local Range = { }
 
 function Range.create(queue, from, to)
