@@ -3,8 +3,9 @@
 
 local Export = require "core.utils.export"
 local Component = require "core.component"
+local Class = require "core.utils.class"
 
-local Escapable = {}
+local Escapable = Class("Escapable::Component")
 
 function Escapable:keypress(dt, key)
     if key == "escape" then
